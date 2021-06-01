@@ -1,0 +1,25 @@
+#!/bin/bash
+
+shopt -s expand_aliases
+	    alias myall='';
+		alias mydebug='';
+		alias myinfo='';
+		alias mywar='';
+		alias myerr='';
+Flag=0;
+case "$1" in
+	'all'|'0'     ) Flag=9;;
+	'debug'       ) Flag=4;;
+	'info'        ) Flag=3;;	
+	'war'|'waring') Flag=2;;
+	'err'|'error' ) Flag=1;;
+	*             ) Flag=0;;
+
+esac
+
+if [ "$Flag" -ge "9" ];then alias mydebug='echo -n $(caller 0|tr " " ":";date +%Y%m%d-%T):$$:$BASHPID:$LINENO:LOG:[all ]" "'; fi
+if [ "$Flag" -ge "4" ];then alias mydebug='echo -n $(caller 0|tr " " ":";date +%Y%m%d-%T):$$:$BASHPID:$LINENO:LOG:[debug ]" "'; fi
+if [ "$Flag" -ge "3" ];then alias myinfo='echo -n $(caller 0|tr " " ":";date +%Y%m%d-%T):$$:$BASHPID:$LINENO:LOG:[info]" "'; fi
+if [ "$Flag" -ge "2" ];then alias mywar='echo -n $(caller 0|tr " " ":";date +%Y%m%d-%T):$$:$BASHPID:$LINENO:LOG:[war]" "';fi
+if [ "$Flag" -ge "1" ];then alias myerr='echo -n $(caller 0|tr " " ":";date +%Y%m%d-%T):$$:$BASHPID:$LINENO:LOG:[err]" "';fi
+

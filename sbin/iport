@@ -1,0 +1,88 @@
+#!/bin/bash
+#网络验证工具
+#1、telnet
+#2、nc
+#3、nmap 
+declare g_OIFS="$IFS"                                 #分隔符                                                                                                
+declare g_SrcDir="$(pwd)"                             #当前执行目录
+g_PathFile=$(readlink -f $0)
+g_DriSrc=$(dirname $(dirname $g_PathFile))
+g_DirScfg=$g_DriSrc/scfg
+DirScfg=$g_DirScfg
+iportFile=$DirScfg/iport.list
+
+IP=$1
+PORT=$2
+
+#1、初始化数据:
+init(){
+    IPA=$(ip addr show 2>/dev/null|sed -n '/\<inet.*eth/{s#inet\(.*\)/.*#\1#g;s#[ \t]##g;p}')
+    if [ -z "${IPA}" ];then
+        IPA=$(sed -n "/\<IPADDR\>/{ s#[ \t]##g;/^IPADDR/{s#.*=##g;p}}" /etc/sysconfig/network-scripts/ifcfg-eth*)
+    fi
+    IPS=$IPA
+   
+    if [ ! -z $IP ] && [ ! -z "$PORT" ] ;then       
+        iports;
+        exit 0;
+    fi
+}
+
+iports(){
+    #ncStr=$(echo '\n'|nc -w2 -nvz $IP $PORT 2>&1 |tr -s '\n' ':')
+    ncStr=$(echo '\n'|nc -w2 -nv $IP $PORT 2>&1 |tr -s '\n' ':')
+    case   $ncStr in
+        *[Tt][Ii][Mm][Ee]*|*[Oo][Uu][Tt]*)printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ 2 | N ] timeOut\n" $IPS $IP $PORT ;;
+        *succeeded*|*[Cc]onnection*[Tt][Oo]*$IP*)
+            printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ 1 | Y ] succeeded\n" $IPS $IP $PORT;;
+        *failed*|*[Cc]onnection*refused*   )
+            printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ 0 | N ] failed\n" $IPS $IP $PORT;;
+        *found* | * )
+           
+            if [ 1 -eq $(echo '\n'|telnet $IP $PORT 2>/dev/null|egrep '\^\]'|wc -l) ];then
+                printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ 1 | Y ] succeeded\n" $IPS $IP $PORT 
+            else
+                printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ 0 | N ] failed\n" $IPS $IP $PORT 
+            fi
+            ;;
+    esac
+
+}
+
+cmds(){
+
+    if [ ! -f $iportFile ];then
+        echo "line[$LINENO] iportFile=[$iportFile] 不存在退出 或者 [$g_PathFile ip port]"
+        echo  "配置文件格式为：
+           #xxxxx
+           IP|port0,p1,p2,p3 #xxxx
+        "
+        exit -1
+    else
+        echo "line[$LINENO]  读取配置文件列表 iportFile=[$iportFile]"
+    fi
+
+    while read line;do
+        line=$(echo $line|sed  "s/#.*//g" )
+        [ -z "$line" ] && continue;
+        
+        #echo "line=>[$line]"
+        IP=$(echo $line|awk -F'|' '{print $1}')
+        portList=$(echo $line|awk -F'|' '{print $2}'|sed 's/,/\t/g')
+        if [ ! -z $IP ] && [ ! -z "$portList" ] ;then    
+            for PORT in $portList ;do 
+              iports;
+            done
+        fi
+    done<$iportFile
+}
+
+
+#获取执行结果
+main(){
+init "$@"
+cmds
+}
+
+
+main
