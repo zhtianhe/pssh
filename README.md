@@ -1,44 +1,44 @@
 
 # <p align="center"> <kbd> pshg </kbd> </p>
 
-## 1¡¢°²×°½Å±¾£º
+## 1ã€å®‰è£…è„šæœ¬ï¼š
 
 vi ~/.bash_profile
 ```sh
 export PSHOME=$HOME/sbin/pssh
 source $PSHOME/scfg/pssh.env
 ```
-¼ÓÔØ£º` source ~/.bash_profile `
+åŠ è½½ï¼š` source ~/.bash_profile `
 
-## 2¡¢ÅäÖÃÎÄ¼ş£º$PSHOME/scfg
+## 2ã€é…ç½®æ–‡ä»¶ï¼š$PSHOME/scfg
 - $PSHOME/scfg/.pssh-hosts.conf
 ```ini
 #column-t-s''
-#1¡¢IP|hostname
-#2¡¢ÔËĞĞÖĞĞÄ
-#3¡¢ÖĞÎÄÃû³Æ
-#4¡¢ÓÃ»§¿ÚÁî
-#IP,hostname|×éid|¼òÒªËµÃ÷|ÓÃ»§1/key1,u2/k2,
-#MBFE »·¾³
-#IP            ,hostname,½ÚµãÃû,|xxx×é,|»úÆ÷ÓÃÍ¾,ÆäËûËµÃ÷   |User1/password,User2/password,......,
+#1ã€IP|hostname
+#2ã€è¿è¡Œä¸­å¿ƒ
+#3ã€ä¸­æ–‡åç§°
+#4ã€ç”¨æˆ·å£ä»¤
+#IP,hostname|ç»„id|ç®€è¦è¯´æ˜|ç”¨æˆ·1/key1,u2/k2,
+#MBFE ç¯å¢ƒ
+#IP            ,hostname,èŠ‚ç‚¹å,|xxxç»„,|æœºå™¨ç”¨é€”,å…¶ä»–è¯´æ˜   |User1/password,User2/password,......,
 #===============================================================================================================
-#NCD×é
-xxx.xxx.xxx.xxx,NCD01, node1 ,  |NCD ,| Ó¦ÓÃ01    ,01 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
-xxx.xxx.xxx.xxx,NCD02, node2 ,  |NCD ,| Ó¦ÓÃ02    ,02 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
-xxx.xxx.xxx.xxx,NCD03, node3 ,  |NCD ,| Ó¦ÓÃ03    ,03 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
-xxx.xxx.xxx.xxx,NCD04, node4 ,  |NCD ,| Ó¦ÓÃ04    ,04 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
-xxx.xxx.xxx.xxx,NCD05, node5 ,  |NCD ,| Ó¦ÓÃ05    ,05 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
+#NCDç»„
+xxx.xxx.xxx.xxx,NCD01, node1 ,  |NCD ,| åº”ç”¨01    ,01 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
+xxx.xxx.xxx.xxx,NCD02, node2 ,  |NCD ,| åº”ç”¨02    ,02 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
+xxx.xxx.xxx.xxx,NCD03, node3 ,  |NCD ,| åº”ç”¨03    ,03 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
+xxx.xxx.xxx.xxx,NCD04, node4 ,  |NCD ,| åº”ç”¨04    ,04 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
+xxx.xxx.xxx.xxx,NCD05, node5 ,  |NCD ,| åº”ç”¨05    ,05 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
 
 
-#NCY×é
-xxx.xxx.xxx.xxx,NCY01, node1 ,  |NCY ,| Ó¦ÓÃ01    ,01 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
-xxx.xxx.xxx.xxx,NCY02, node2 ,  |NCY ,| Ó¦ÓÃ02    ,02 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
-xxx.xxx.xxx.xxx,NCY03, node3 ,  |NCY ,| Ó¦ÓÃ03    ,03 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
-xxx.xxx.xxx.xxx,NCY04, node4 ,  |NCY ,| Ó¦ÓÃ04    ,04 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
-xxx.xxx.xxx.xxx,NCY05, node5 ,  |NCY ,| Ó¦ÓÃ05    ,05 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
+#NCYç»„
+xxx.xxx.xxx.xxx,NCY01, node1 ,  |NCY ,| åº”ç”¨01    ,01 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
+xxx.xxx.xxx.xxx,NCY02, node2 ,  |NCY ,| åº”ç”¨02    ,02 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
+xxx.xxx.xxx.xxx,NCY03, node3 ,  |NCY ,| åº”ç”¨03    ,03 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
+xxx.xxx.xxx.xxx,NCY04, node4 ,  |NCY ,| åº”ç”¨04    ,04 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
+xxx.xxx.xxx.xxx,NCY05, node5 ,  |NCY ,| åº”ç”¨05    ,05 , centos7.6 :pg14.0 ,|User1/password,User2/password,......,
 
 ```
-- ×éÅäÖÃ
+- ç»„é…ç½®
 
 ```ini
 #ini
@@ -47,9 +47,9 @@ base64_key=shid
 [CONF_END]
 [all]
 #egrep  "\<$(sed -n '/HostList/p' psh-UserGroup |cut -d'=' -f2)\>" hosts-YQ.conf
-#------ÔÆÇ¨ÒÆ¶¨°æ»·¾³---------
+#------äº‘è¿ç§»å®šç‰ˆç¯å¢ƒ---------
 
-#ncd×é
+#ncdç»„
 [ncd]
 UserName=
 HostList0=NCD[0-9].*
@@ -73,129 +73,130 @@ HostList0=YY[0-9].*
 
 ```
 
-¼òÒªÃüÁî£º
+ç®€è¦å‘½ä»¤ï¼š
 
 ```sh
 
-# ÅúÁ¿ÖØÆô·şÎñ
-pshg -W -g ncd -U User1  -c 'kall;startall'  #ÖØÆôncd×é xxx ÓÃ»§ÏÂµÄ Ó¦ÓÃ¼°·şÎñ          ;ÈôÒÑ¾­Æô¶¯Ôò¼ì²éÆô¶¯×´Ì¬
-pshg -W -g ncd -U USER1   -c 'startall'       #Æô¶¯ncd×é USER1  ÓÃ»§ÏÂµÄÓ¦ÓÃ;ÈôÒÑ¾­Æô¶¯Ôò¼ì²éÆô¶¯×´Ì¬
-pshg -W -g User-app   -c 'startall'    #Æô¶¯ncd×é USER1 ÓÃ»§ÏÂµÄ UserName;ÈôÒÑ¾­Æô¶¯Ôò¼ì²éÆô¶¯×´Ì¬
+# æ‰¹é‡é‡å¯æœåŠ¡
+pssh -W -g ncd -U User1  -c 'kall;startall'  #é‡å¯ncdç»„ xxx ç”¨æˆ·ä¸‹çš„ åº”ç”¨åŠæœåŠ¡          ;è‹¥å·²ç»å¯åŠ¨åˆ™æ£€æŸ¥å¯åŠ¨çŠ¶æ€
+pssh -W -g ncd -U USER1  -c 'startall'       #å¯åŠ¨ncdç»„ USER1  ç”¨æˆ·ä¸‹çš„åº”ç”¨;è‹¥å·²ç»å¯åŠ¨åˆ™æ£€æŸ¥å¯åŠ¨çŠ¶æ€
+pssh -W -g User-app      -c 'startall'    #å¯åŠ¨ncdç»„ USER1 ç”¨æˆ·ä¸‹çš„ UserName;è‹¥å·²ç»å¯åŠ¨åˆ™æ£€æŸ¥å¯åŠ¨çŠ¶æ€
 ```
 
-- ¼òµ¥Ê¹ÓÃ·½·¨£º
+- ç®€å•ä½¿ç”¨æ–¹æ³•ï¼š
 ```
     |-----------------------------------------------------------------------------------------------------
-    |                             °ïÖúĞÅÏ¢
-    |   Ãû³Æ    £º  pssh
-    |   ÀàĞÍ    £º  Bash (Ö÷¶¯ÍÆËÍ)|zh_CN.UTF-8
-    |   Ó¦ÓÃ»·¾³:   LINUX
-    |   ÒÀÀµÃüÁî£º  ssh|scp|rsync|expect|openssl
-    |   ¹¦ÄÜÃèÊö£º  ¼¯ÈºÅúÁ¿¹ÜÀí²Ù×÷¹¤¾ß;
-    |   Èı´ó¹¦ÄÜ:   1¡¢ssh µ¥µã/´©ĞĞµÇÂ¼
-    |               2¡¢ssh ÅúÁ¿Ô¶³ÌÃüÁî
-    |               3¡¢scp ÅúÁ¿ÎÄ¼şÉÏ´«ÏÂÔØ
-    |         ÓÅµã:Í¨¹ıÅäÖÃ ³õÊ¼ÃØÔ¿ÎÄ¼ş,ºÍ×é²Ù×÷ÎÄ¼şÖÆ×÷³ö¼ÓÃÜÎÄ¼ş,
-    |              #°²×°¼òµ¥£ºvi /c/Users/ZTE/.bash_porfile
-    |         È±µã:ÅäÖÃ³õÊ¼ÃØÔ¿ÎÄ¼ş,ºÍ×é²Ù×÷ÎÄ¼ş,½Å±¾²»ÄÜ¼ÓÃÜ
-    |              ÀàËÆÈí¼ş: pssh | clushtershell | Ansible  
+    |                             å¸®åŠ©ä¿¡æ¯
+    |   åç§°    ï¼š  pssh
+    |   ç±»å‹    ï¼š  Bash (ä¸»åŠ¨æ¨é€)|zh_CN.UTF-8
+    |   åº”ç”¨ç¯å¢ƒ:   LINUX
+    |   ä¾èµ–å‘½ä»¤ï¼š  ssh|scp|rsync|expect|openssl
+    |   åŠŸèƒ½æè¿°ï¼š  é›†ç¾¤æ‰¹é‡ç®¡ç†æ“ä½œå·¥å…·;
+    |   ä¸‰å¤§åŠŸèƒ½:   1ã€ssh å•ç‚¹/ç©¿è¡Œç™»å½•
+    |               2ã€ssh æ‰¹é‡è¿œç¨‹å‘½ä»¤
+    |               3ã€scp æ‰¹é‡æ–‡ä»¶ä¸Šä¼ ä¸‹è½½
+    |         ä¼˜ç‚¹:é€šè¿‡é…ç½® åˆå§‹ç§˜é’¥æ–‡ä»¶,å’Œç»„æ“ä½œæ–‡ä»¶åˆ¶ä½œå‡ºåŠ å¯†æ–‡ä»¶,
+    |              #å®‰è£…ç®€å•ï¼švi /c/Users/ZTE/.bash_porfile
+    |         ç¼ºç‚¹:é…ç½®åˆå§‹ç§˜é’¥æ–‡ä»¶,å’Œç»„æ“ä½œæ–‡ä»¶,è„šæœ¬ä¸èƒ½åŠ å¯†
+    |              ç±»ä¼¼è½¯ä»¶: pssh | clushtershell | Ansible  
     |-----------------------------------------------------------------------------------------------------
     |
     | Usage : pssh [OPTION] ....
     |
     | Options:
-    |     --help              °ïÖúĞÅÏ¢
-    |    *-g, --group         ×éÑ¡Ïî  | ×éÃû³Æ±êÇ©£»×éÅäÖÃÎÄ¼ş[]
-    |    *-g, --group         ×éÇåµ¥  | ÁĞ¾Ù³ö×éÃûÇåµ¥
-    |    *-h, --hosts         Ö÷»úÃû³Æ| all:ËùÓĞÖ÷»ú|Ö÷»úÅäÖÃÎÄ¼ş[]
-    |    *-H, --hosts         Ö÷»úÇåµ¥| ÁĞ¾Ù³öÃû³ÆºÍIP
-    |    *-U, --username      ÓÃ»§Ãû³Æ| ÎŞ¸ÃÑ¡Ïî-ÓÃ»§ »òÕß×é±êÇ©ÖĞÓÃ»§| all:ËùÓĞÓÃ»§   	
-    |    *-l, --login         µÇÂ¼±êÊ¶| ÎŞ²ÎÊı
-    |    *-c, --cmdsh         Ö´ĞĞÃüÁî| ÃüÁîÓĞ¿Õ¸ñµÄ¼ÓÒıºÅ:(×¢Òâµ¥Ë«ÒıºÅºÍ×ªÒå)                    
-    |    *-s, --scp           ÎÄ¼ş´«Êä| ·¢ËÍ:put:srcdir,destdir
-    |                                 | »ñÈ¡:get:srcdir,destdir
-    |    *-S, --rsync         ÎÄ¼ş´«Êä|  S:Ê¹ÓÃrsync ÃüÁî Ğ¡s:Ê¹ÓÃscpÃüÁî
-    |     -w, --passwd        ÃÜÂëÑ¡Ïî| Ê¹ÓÃ expect ¹¤¾ß×Ô¶¯Ìî³ä¿ÚÁî
-    |     -W, --passwd        ÃÜÂëÑ¡Ïî| Ê¹ÓÃ sshpss  ¹¤¾ß×Ô¶¯Ìî³ä¿ÚÁî
-    |     -v, --version       ½Å±¾°æ±¾|                 
-    |     -L, --logleve       ÈÕÖ¾¼¶±ğ| debug:1; info:2; warn:3; error:4  ;#all:0 diss=8"    
-    |     -p, --port          Ö÷»ú¶Ë¿Ú| Ä¬:22   
-    |     -t,                 ½ø³ÌÊıÁ¿| Ä¬:10 ¡¢1-ÓÃÓÚµ÷ÊÔ
-    |     -T, --timeout       ³¬Ê±Ê±¼ä| Ä¬:60 ¡¢   
-    |    #-a, --all           ËùÓĞÓÃ»§| ËùÓĞ×é(ÔİÎ´ÊµÏÖ)
-    |    #-x, --removel       ÅÅ³ıÖ÷»ú| ×éÃû| ¶à¸öÓÃ ¶ººÅ,·Ö¸î(ÔİÎ´ÊµÏÖ)
-    |     -k, --key           ÖÆ×÷Ö¤Êé|
-    |     -K, --key           ÖÆ×÷»¥ĞÅ|²¢´«Êä»¥ĞÅÎÄ¼ş (Ö´ĞĞ¸Ã²½ÖèÊ±ÏÈÖ´ĞĞ -c 'id')
-    |     -E, --key           ±à¼­±¾½Å±¾|vi /c/Users/ZTE/Desktop/pshg-20210531/psh/sbin/pssh
-    |    #-i, --install       °²×°½Å±¾| Ä¬ÈÏ°²×°Ä¿Â¼:/c/Users/ZTE/Zssh/bin
-    |    #--clog              Çå³ıÈÕÖ¾| Çå³ı pssh Ö´ĞĞµÄÈÕÖ¾
+    |     --help              å¸®åŠ©ä¿¡æ¯
+    |    *-g, --group         ç»„é€‰é¡¹  | ç»„åç§°æ ‡ç­¾ï¼›ç»„é…ç½®æ–‡ä»¶[]
+    |    *-g, --group         ç»„æ¸…å•  | åˆ—ä¸¾å‡ºç»„åæ¸…å•
+    |    *-h, --hosts         ä¸»æœºåç§°| all:æ‰€æœ‰ä¸»æœº|ä¸»æœºé…ç½®æ–‡ä»¶[]
+    |    *-H, --hosts         ä¸»æœºæ¸…å•| åˆ—ä¸¾å‡ºåç§°å’ŒIP
+    |    *-U, --username      ç”¨æˆ·åç§°| æ— è¯¥é€‰é¡¹-ç”¨æˆ· æˆ–è€…ç»„æ ‡ç­¾ä¸­ç”¨æˆ·| all:æ‰€æœ‰ç”¨æˆ·   	
+    |    *-l, --login         ç™»å½•æ ‡è¯†| æ— å‚æ•°
+    |    *-c, --cmdsh         æ‰§è¡Œå‘½ä»¤| å‘½ä»¤æœ‰ç©ºæ ¼çš„åŠ å¼•å·:(æ³¨æ„å•åŒå¼•å·å’Œè½¬ä¹‰)                    
+    |    *-s, --scp           æ–‡ä»¶ä¼ è¾“| å‘é€:put:srcdir,destdir
+    |                                 | è·å–:get:srcdir,destdir
+    |    *-S, --rsync         æ–‡ä»¶ä¼ è¾“|  S:ä½¿ç”¨rsync å‘½ä»¤ å°s:ä½¿ç”¨scpå‘½ä»¤
+    |     -w, --passwd        å¯†ç é€‰é¡¹| ä½¿ç”¨ expect å·¥å…·è‡ªåŠ¨å¡«å……å£ä»¤
+    |     -W, --passwd        å¯†ç é€‰é¡¹| ä½¿ç”¨ sshpss  å·¥å…·è‡ªåŠ¨å¡«å……å£ä»¤
+    |     -v, --version       è„šæœ¬ç‰ˆæœ¬|                 
+    |     -L, --logleve       æ—¥å¿—çº§åˆ«| debug:1; info:2; warn:3; error:4  ;#all:0 diss=8"    
+    |     -p, --port          ä¸»æœºç«¯å£| é»˜:22   
+    |     -t,                 è¿›ç¨‹æ•°é‡| é»˜:10 ã€1-ç”¨äºè°ƒè¯•
+    |     -T, --timeout       è¶…æ—¶æ—¶é—´| é»˜:60 ã€   
+    |    #-a, --all           æ‰€æœ‰ç”¨æˆ·| æ‰€æœ‰ç»„(æš‚æœªå®ç°)
+    |    #-x, --removel       æ’é™¤ä¸»æœº| ç»„å| å¤šä¸ªç”¨ é€—å·,åˆ†å‰²(æš‚æœªå®ç°)
+    |     -k, --key           åˆ¶ä½œè¯ä¹¦|
+    |     -K, --key           åˆ¶ä½œäº’ä¿¡|å¹¶ä¼ è¾“äº’ä¿¡æ–‡ä»¶ (æ‰§è¡Œè¯¥æ­¥éª¤æ—¶å…ˆæ‰§è¡Œ -c 'id')
+    |     -E, --key           ç¼–è¾‘æœ¬è„šæœ¬|vi /c/Users/ZTE/Desktop/pshg-20210531/psh/sbin/pssh
+    |    #-i, --install       å®‰è£…è„šæœ¬| é»˜è®¤å®‰è£…ç›®å½•:/c/Users/ZTE/Zssh/bin
+    |    #--clog              æ¸…é™¤æ—¥å¿—| æ¸…é™¤ pssh æ‰§è¡Œçš„æ—¥å¿—
+    |    #--ping              ping   | æš‚æœªå®ç°
     | Exit status
     |      0      OK
     |      !=0    ERROR
     |
     | Example:
-    |     1) µÇÂ¼: ssh --port=22 UserName@IPADDR
+    |     1) ç™»å½•: ssh --port=22 UserName@IPADDR
     |
-    |       A)Ê¹ÓÃÃØÔ¿ÎÄ¼ş×Ô¶¯µÇÂ¼
+    |       A)ä½¿ç”¨ç§˜é’¥æ–‡ä»¶è‡ªåŠ¨ç™»å½•
     |         pssh -lW -h hostname -U userName  
-    |         pssh -lw -h hostname -U userName  #µÇÂ¼»ºÂı
-    |       B)´®ĞĞµÇÂ¼ groupApp ×é
+    |         pssh -lw -h hostname -U userName  #ç™»å½•ç¼“æ…¢
+    |       B)ä¸²è¡Œç™»å½• groupApp ç»„
     |         pssh -lW -g groupApp -U userName  
     |      
-    |     2) Ö´ĞĞÃüÁî
+    |     2) æ‰§è¡Œå‘½ä»¤
     |
-    |       A) Ö´ĞĞ id ÃüÁî
+    |       A) æ‰§è¡Œ id å‘½ä»¤
     |         pssh -W -h hostname -U userName  -c 'id'
-    |       B)²¢ĞĞ Ö´ĞĞ id ÃüÁî
+    |       B)å¹¶è¡Œ æ‰§è¡Œ id å‘½ä»¤
     |        pssh -W -g groupApp  -U userName  -c 'id'
-	|        pssh -W -h all  -U all  -c 'id'  #ÒÑÖªËùÓĞIP ¼°ËùÓĞÓÃ»§Ö´ĞĞ
+    |        pssh -W -h all  -U all  -c 'id'  #å·²çŸ¥æ‰€æœ‰IP åŠæ‰€æœ‰ç”¨æˆ·æ‰§è¡Œ
     |      
     |
-    |     3)get file£ºÏÂÔØÎÄ¼ş(×¢Òâ¶à½ÚµãÏÂ¸²¸Ç)
-    |       SCP  £º   pssh -W -h hostname -s get:/destdir/file:/srcdir/
-    |       RSYNC£º   pssh -W -h hostname -S get:/destdir/file:/srcdir/
-    |        - ×é
+    |     3)get fileï¼šä¸‹è½½æ–‡ä»¶(æ³¨æ„å¤šèŠ‚ç‚¹ä¸‹è¦†ç›–)
+    |       SCP  ï¼š   pssh -W -h hostname -s get:/destdir/file:/srcdir/
+    |       RSYNCï¼š   pssh -W -h hostname -S get:/destdir/file:/srcdir/
+    |        - ç»„
     |        SCP  : pssh -W -g groupApp   -s get:/destdir/file:/srcdir/
-	|        RSYNC: pssh -W -g groupApp   -S get:/destdir/file:/srcdir/
-	|
-    |     4)put file£º ½«±¾µØÎÄ¼şÉÏ´«ÖÁÄ¿±ê»ú
+    |        RSYNC: pssh -W -g groupApp   -S get:/destdir/file:/srcdir/
+    |
+    |     4)put fileï¼š å°†æœ¬åœ°æ–‡ä»¶ä¸Šä¼ è‡³ç›®æ ‡æœº
     |        SCP  : pssh -W -h hostname -s put:~/srcdir/file:~/destdir/
-	|        RSYNC: pssh -W -h hostname -S put:~/srcdir/file:~/destdir/
-    |        - ×é
+    |        RSYNC: pssh -W -h hostname -S put:~/srcdir/file:~/destdir/
+    |        - ç»„
     |        SCP  : pssh -W -g groupApp -s put:~/srcdir/file:~/destdir/
-	|        RSYNC: pssh -W -g groupApp -S put:~/srcdir/file:~/destdir/
-	|
-    |     5)key file:ÖÆ×÷ÃÜÔ¿
+    |        RSYNC: pssh -W -g groupApp -S put:~/srcdir/file:~/destdir/
+    |
+    |     5)key file:åˆ¶ä½œå¯†é’¥
     |            -k
-    |         ÅäÖÃÎÄ¼ş[]²»´æÔÚÇëÔÚ60sÄÚÊäÈë:Zssh/bin/.hosts.cfg
-    |         ÊäÈëĞÅÏ¢Îª:[Zssh/bin/.hosts.cfg]
-    |         !!!! Ö¤ÊéÖÆ×÷³É¹¦ !!!
+    |         é…ç½®æ–‡ä»¶[]ä¸å­˜åœ¨è¯·åœ¨60så†…è¾“å…¥:Zssh/bin/.hosts.cfg
+    |         è¾“å…¥ä¿¡æ¯ä¸º:[Zssh/bin/.hosts.cfg]
+    |         !!!! è¯ä¹¦åˆ¶ä½œæˆåŠŸ !!!
     |     
-    |          ¸ù¾İÌáÊ¾ÊäÈë£ºÎÄ¼şÃû³Æ ÄÚÈİ¸ñÊ½ÈçÏÂ£º
+    |          æ ¹æ®æç¤ºè¾“å…¥ï¼šæ–‡ä»¶åç§° å†…å®¹æ ¼å¼å¦‚ä¸‹ï¼š
     |          cat  .Example    
     |
-    |     6)ÖÆ×÷»¥ĞÅ
-    |       A) Ö´ĞĞ id ÃüÁî
+    |     6)åˆ¶ä½œäº’ä¿¡
+    |       A) æ‰§è¡Œ id å‘½ä»¤
     |         pssh -W -h all  -U all  -c 'id'
-    |       B) ¿ªÊ¼»¥ĞÅ ËùÓĞ IP ¼° ËùÓĞÓÃ»§
+    |       B) å¼€å§‹äº’ä¿¡ æ‰€æœ‰ IP åŠ æ‰€æœ‰ç”¨æˆ·
     |         pssh -W -h all  -U all  -K
-    |       c) ¿ªÊ¼»¥ĞÅ app ×é ¼° ËùÓĞÓÃ»§
+    |       C) å¼€å§‹äº’ä¿¡ app ç»„ åŠ æ‰€æœ‰ç”¨æˆ·
     |         pssh -W -g app  -U all  -K
-	|
-    |     7)User_Group file£º×éÎÄ¼ş
+    |
+    |     7)User_Group fileï¼šç»„æ–‡ä»¶
     |             cat  .Example
-    |         ×¢Òâ:base64_keyÎª³õÊ¼ÃØÔ¿¿ÚÁî´®½öÔÚÖÆ×÷Ö¤ÊéÊ±ÓĞĞ§¡£
-    |              ¸Ã¿ÚÁî²¢²»ÄÜ½âÃÜÖ¤Êé¡£     
+    |         æ³¨æ„:base64_keyä¸ºåˆå§‹ç§˜é’¥å£ä»¤ä¸²ä»…åœ¨åˆ¶ä½œè¯ä¹¦æ—¶æœ‰æ•ˆã€‚
+    |              è¯¥å£ä»¤å¹¶ä¸èƒ½è§£å¯†è¯ä¹¦ã€‚     
     |
     | Report bugs to 123456789@qq.com          
-    |                                                         ZhangTianhe  
-    |                                                         2018Äê 08ÔÂ 21ÈÕ ĞÇÆÚ¶ş 08:48:35 CST
+    |                                                         Tianhe  
+    |                                                         2018å¹´ 08æœˆ 21æ—¥ æ˜ŸæœŸäºŒ 08:48:35 CST
     |______________________________________________________________________________________________
 ```
 
-## ÍøÂçÑéÖ¤¹¤¾ß-iport
+## 3ã€ç½‘ç»œéªŒè¯å·¥å…·-iport
 
-- iport ÅäÖÃ
+- iport é…ç½®
 ```sh
 # $PSHOME/scfg/iport.list
 # IP|port
@@ -204,5 +205,5 @@ xxx.xxx.xxx.xxx| 21,22,23,80,5480
 xxx.xxx.xxx.xxx| 21,22,23,80,5480
 xxx.xxx.xxx.xxx| 21, 22,23, 80,5480
 ```
-- ` iport ` Ä¬ÈÏÅäÖÃÎÄ¼ş´óÅúÁ¿ÍøÂçÑéÖ¤Ê¹ÓÃ
-- ` iport  IP  port ` µ¥¶À
+- ` iport ` é»˜è®¤é…ç½®æ–‡ä»¶å¤§æ‰¹é‡ç½‘ç»œéªŒè¯ä½¿ç”¨
+- ` iport  IP  port ` å•ç‹¬
