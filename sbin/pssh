@@ -3,7 +3,7 @@
 #############################################################################
 ## Copyright:
 ## Filename: psh
-## Description:  ×Ô¶¯»¯ÔËÎ¬¹¤¾ß-Psh
+## Description:  è‡ªåŠ¨åŒ–è¿ç»´å·¥å…·-Psh
 ## Version: v1.1
 ## Created: 
 ## set enc fenc tenc
@@ -12,19 +12,25 @@
 ##  termencoding=gb18030
 ############################################################################
 
-###########ÉùÃ÷»·¾³±äÁ¿##########################
-declare g_OIFS="$IFS"                                 #·Ö¸ô·û
+###########å£°æ˜ç¯å¢ƒå˜é‡##########################
+declare g_OIFS="$IFS"                                 #åˆ†éš”ç¬¦
 declare g_OIFSn=$(printf "\n")
-declare g_SrcDir="$(pwd)"                             #µ±Ç°Ö´ĞĞÄ¿Â¼
-declare g_PathFileName="$(readlink -f $0)"            #µ±Ç°ÃüÁîÖ´ĞĞ½Å±¾È«Â·¾¶¼°Ä¿Â¼
-declare g_FileName="$(basename ${g_PathFileName})"    #µ±Ç°½Å±¾ÎÄ¼şÃû
-declare g_curPath="$(dirname ${g_FileName})"          #µ±Ç°½Å±¾ËùÔÚÄ¿Â¼
-declare g_logPath=""                                  #ÈÕÖ¾Â·¾¶
-declare g_logFile=""                                  #ÈÕÖ¾ÎÄ¼şÃû³Æ
-declare g_logLevel=4                                  #µ±Ç°½Å±¾ÈÕÖ¾¼¶±ğ: debug:1; info:2; warn:3; error:4  ;#all:0 diss=8
-declare g_ScriptName='pssh'                           #½Å±¾ÄÚ²¿ÎÄ¼şÃû
-declare g_srciptVersion='1.0.0.1'                     #½Å±¾°æ±¾ºÅ
-#Êı¾İ¸ñÊ½
+declare g_SrcDir="$(pwd)"                             #å½“å‰æ‰§è¡Œç›®å½•
+declare g_PathFileName="$(readlink -f $0)"            #å½“å‰å‘½ä»¤æ‰§è¡Œè„šæœ¬å…¨è·¯å¾„åŠç›®å½•
+declare g_FileName="$(basename ${g_PathFileName})"    #å½“å‰è„šæœ¬æ–‡ä»¶åä¸å«è·¯å¾„
+declare g_curPath="$(dirname ${g_PathFileName})"      #å½“å‰è„šæœ¬ä½ç½®ç›®å½•
+declare g_RootPath="$(dirname ${g_curPath})"          #å½“å‰è„šæœ¬ræ ¹ç›®å½•
+declare g_ConfPath="$g_RootPath/scfg"                 #å½“å‰è„šæœ¬cfgç›®å½•
+declare g_BinPath="$g_RootPath/bin"                   #å½“å‰è„šæœ¬binç›®å½•
+declare g_SbinPath="$g_RootPath/sbin"                 #å½“å‰è„šæœ¬binç›®å½•
+export  PATH=${g_BinPath}:$g_SbinPath:$PATH           #å£°æ˜ç¯å¢ƒå˜é‡
+declare g_ConfFile="${g_FileName%%.*}.conf"           #å½“å‰è„šæœ¬é…ç½®æ–‡ä»¶
+declare g_logPath=""                                  #æ—¥å¿—è·¯å¾„
+declare g_logFile=""                                  #æ—¥å¿—æ–‡ä»¶åç§°
+declare g_logLevel=4                                  #å½“å‰è„šæœ¬æ—¥å¿—çº§åˆ«: debug:1; info:2; warn:3; error:4  ;#all:0 diss=8
+declare g_ScriptName='pssh'                           #è„šæœ¬å†…éƒ¨æ–‡ä»¶å
+declare g_srciptVersion='1.0.0.1'                     #è„šæœ¬ç‰ˆæœ¬å·
+#æ•°æ®æ ¼å¼
 g_FmtTimes="date -d today +%Y-%m-%d-%H:%M:%S"  #srcdir="`pwd`"
 g_FmtDates="date -d today +%Y%m%d"               #Path filename
 
@@ -37,7 +43,7 @@ g_ScriptBase64="$_dircfg/$g_ScriptName-Base64"
 
 ################################################
 # Function: init_path
-# Description: ³õÊ¼»¯½Å±¾ËùÔÚÄ¿Â¼
+# Description: åˆå§‹åŒ–è„šæœ¬æ‰€åœ¨ç›®å½•
 # Parameter:
 #     input:
 #     N/A
@@ -67,22 +73,22 @@ init_path()
 	g_dir="${g_setup_tool_package_home}"
 	g_dirBin="${g_dir}/bin"
 	g_dirSlog="$HOME/log/slog"               ;[ -d "${g_dirSlog}" ] || mkdir -m 777 -p "${g_dirSlog}"      #slog   path
-	g_logPath="${g_dirSlog}"                ;[ -d "${g_logPath}" ] || mkdir -m 777 -p "${g_logPath}"      #ÈÕÖ¾Ä¿Â¼ 
+	g_logPath="${g_dirSlog}"                ;[ -d "${g_logPath}" ] || mkdir -m 777 -p "${g_logPath}"      #æ—¥å¿—ç›®å½• 
 	g_dirScfg="${g_dir}/scfg"               ;[ -d "${g_dirScfg}" ] || mkdir -m 500 -p "${g_dirScfg}"      #config path
 	g_dirSlib="${g_dir}/slib"               ;[ -d "${g_dirSlib}" ] || mkdir -m 555 -p "${g_dirSlib}"      #func   path
 	g_dirSbin="${g_dir}/sbin"               ;[ -d "${g_dirSbin}" ] || mkdir -m 555 -p "${g_dirSbin}"      #sibn   path
 	#g_dirDat="${g_dir}/file/dat"            ;[ -d "${g_dirDat}"  ] || mkdir -m 755 -p "${g_dirDat}"       #data   path
 	#g_dirDatE="${g_dirDat}/$(${g_FmtDates})";[ -d "${g_dirDatE}" ] || mkdir -m 755 -p "${g_dirDatE}"      #data+date path
 
-    g_ScriptConf=                                               #½Å±¾ÅäÖÃÎÄ¼ş
-	g_ScriptHosts="${g_dirScfg}/.${g_ScriptName}-hosts.conf"                  #Ö÷»úÅäÖÃÎÄ¼şĞÅÏ¢	
+    g_ScriptConf=                                               #è„šæœ¬é…ç½®æ–‡ä»¶
+	g_ScriptHosts="${g_dirScfg}/.${g_ScriptName}-hosts.conf"                  #ä¸»æœºé…ç½®æ–‡ä»¶ä¿¡æ¯	
 	g_ScriptBase64="$g_dirScfg/${g_ScriptName}-Base64"
-	g_ScriptGroup="${g_dirScfg}/${g_ScriptName}-UserGroup"      #×éÅäÖÃÎÄ¼ş
-	#g_ScriptTables="${g_dirScfg}/${g_ScriptName}-tables.conf"  #Ç¨ÒÆµÄ±íÇåµ¥
-	g_logFile="$($g_FmtDates)-${g_scriptName}.log"                             #ÈÕÖ¾ÎÄ¼şÃû
-    TimeOut=60;                                                 #³¬Ê±Ê±¼äÄ¬ÈÏ60
+	g_ScriptGroup="${g_dirScfg}/${g_ScriptName}-UserGroup"      #ç»„é…ç½®æ–‡ä»¶
+	#g_ScriptTables="${g_dirScfg}/${g_ScriptName}-tables.conf"  #è¿ç§»çš„è¡¨æ¸…å•
+	g_logFile="$($g_FmtDates)-${g_scriptName}.log"                             #æ—¥å¿—æ–‡ä»¶å
+    TimeOut=60;                                                 #è¶…æ—¶æ—¶é—´é»˜è®¤60
 	#s=' '
-	keys="$(sed -ne "/\<base64_key/{s#base64_key.*=##g;p}" $g_ScriptGroup)"          #»ñÈ¡key
+	keys="$(sed -ne "/\<base64_key/{s#base64_key.*=##g;p}" $g_ScriptGroup)"          #è·å–key
 	#keys=$s
     return 0;
 	cd - >/dev/null
@@ -91,7 +97,7 @@ init_path()
 
 ################################################
 # Function: init_log
-# Description: ³õÊ¼»¯presetÈÕÖ¾ÎÄ¼ş
+# Description: åˆå§‹åŒ–presetæ—¥å¿—æ–‡ä»¶
 # Parameter:
 #     input:
 #     N/A
@@ -108,35 +114,35 @@ init_log()
 	[ -f ${g_logPath}/${g_logFile} ] || touch  "${g_logPath}/${g_logFile}"
 	chmod 700 "${g_logPath}/${g_logFile}"
     #--------------------------------------#
-	#    µ¼ÈëÈÕÖ¾Í·ÎÄ¼ş                    #
+	#    å¯¼å…¥æ—¥å¿—å¤´æ–‡ä»¶                    #
 	#--------------------------------------#
-	#echo "${LINENO};${g_dirSlib},µ¼ÈëÍ·ÎÄ¼ş"
+	#echo "${LINENO};${g_dirSlib},å¯¼å…¥å¤´æ–‡ä»¶"
 	.  "${g_dirSlib}/log.sh" || { echo "[${g_scriptName}:${LINENO}] ERROR:Failed to load ${g_curPath}/log.sh.:";exit 1;}
-	showLog_hide  "${LINENO}" "g_logPath[$g_logPath]|g_logFile=[$g_logFile]|g_logLevel=${g_logLevel}|µ±Ç°½Å±¾ÈÕÖ¾¼¶±ğ: debug:1; info:2; warn:3; error:4  ;#all:0 diss=8"
+	showLog_hide  "${LINENO}" "g_logPath[$g_logPath]|g_logFile=[$g_logFile]|g_logLevel=${g_logLevel}|å½“å‰è„šæœ¬æ—¥å¿—çº§åˆ«: debug:1; info:2; warn:3; error:4  ;#all:0 diss=8"
 	#source ${_dirslib}/mydebug debug
 }
-#---------ÈÕÖ¾²¿·Ö½áÊø--------------------------------------------------
+#---------æ—¥å¿—éƒ¨åˆ†ç»“æŸ--------------------------------------------------
 
 
 #-----------------------------------------
 #
-# ÖÆ×÷Ö¤Êé
+# åˆ¶ä½œè¯ä¹¦
 #
 #----------------------------------------
 creat_base64()
 {
  cd $g_SrcDir;
   if [ ! -f $g_ScriptHosts ];then
-	 read -t 60 -p "ÅäÖÃÎÄ¼ş[$g_ScriptHosts]²»´æÔÚÇëÔÚ60sÄÚÊäÈë:" g_ScriptHosts 
+	 read -t 60 -p "é…ç½®æ–‡ä»¶[$g_ScriptHosts]ä¸å­˜åœ¨è¯·åœ¨60så†…è¾“å…¥:" g_ScriptHosts 
   fi
   
-  echo ÊäÈëĞÅÏ¢Îª:[$g_ScriptHosts]
+  echo è¾“å…¥ä¿¡æ¯ä¸º:[$g_ScriptHosts]
 
   if [ -f $g_ScriptHosts ] && [ ! -z $g_ScriptHosts ];then  
        showLog_diss "${LINENO}" "$(openssl aes-128-cbc -k $keys -base64 -in $g_ScriptHosts >$g_ScriptBase64)"
 	   
   else
-        echo "ÊäÈëÅäÖÃÎÄ¼ş[$g_ScriptHosts]²»´æÔÚ";
+        echo "è¾“å…¥é…ç½®æ–‡ä»¶[$g_ScriptHosts]ä¸å­˜åœ¨";
 	exit ;
   fi   
 cd -;  
@@ -174,7 +180,7 @@ list_hosts_argv()
 list_group_argv()
 {
   showLog_diss "${LINENO}" " file: $g_ScriptGroup"
-  showLog_diss "${LINENO}" " file: ×éÑ¡ÏîÈçÏÂ:"
+  showLog_diss "${LINENO}" " file: ç»„é€‰é¡¹å¦‚ä¸‹:"
   sed -n '/^\[.*\]/{/END\|CONF\|all/!p}'  $g_ScriptGroup
   
   vi  $g_ScriptGroup
@@ -185,7 +191,7 @@ list_group_argv()
 
 ###############################################
 # Function: Usage
-# Description: °ïÖúÃèÊöĞÅÏ¢
+# Description: å¸®åŠ©æè¿°ä¿¡æ¯
 # Parameter:
 #     input:
 #     N/A
@@ -201,110 +207,110 @@ clear;
 
 cat << EOT
     |-----------------------------------------------------------------------------------------------------
-    |                             °ïÖúĞÅÏ¢
-    |   Ãû³Æ    £º  $g_ScriptName
-    |   ÀàĞÍ    £º  Bash (Ö÷¶¯ÍÆËÍ)|zh_CN.UTF-8
-    |   Ó¦ÓÃ»·¾³:   LINUX 
-    |   ÒÀÀµÃüÁî£º  ssh|scp|rsync|expect|openssl
-    |   ¹¦ÄÜÃèÊö£º  ¼¯ÈºÅúÁ¿¹ÜÀí²Ù×÷¹¤¾ß;
-    |   Èı´ó¹¦ÄÜ:   1¡¢ssh µ¥µã/´©ĞĞµÇÂ¼ 
-    |               2¡¢ssh ÅúÁ¿Ô¶³ÌÃüÁî 
-    |               3¡¢scp ÅúÁ¿ÎÄ¼şÉÏ´«ÏÂÔØ
-    |         ÓÅµã:Í¨¹ıÅäÖÃ ³õÊ¼ÃØÔ¿ÎÄ¼ş,ºÍ×é²Ù×÷ÎÄ¼şÖÆ×÷³ö¼ÓÃÜÎÄ¼ş,
-    |              #°²×°¼òµ¥£ºvi $HOME/.bash_porfile
-    |         È±µã:ÅäÖÃ³õÊ¼ÃØÔ¿ÎÄ¼ş,ºÍ×é²Ù×÷ÎÄ¼ş,½Å±¾²»ÄÜ¼ÓÃÜ
-    |              ÀàËÆÈí¼ş: pssh | clushtershell | Ansible  
+    |                             å¸®åŠ©ä¿¡æ¯
+    |   åç§°    ï¼š  $g_ScriptName
+    |   ç±»å‹    ï¼š  Bash (ä¸»åŠ¨æ¨é€)|zh_CN.UTF-8
+    |   åº”ç”¨ç¯å¢ƒ:   LINUX 
+    |   ä¾èµ–å‘½ä»¤ï¼š  ssh|scp|rsync|expect|openssl
+    |   åŠŸèƒ½æè¿°ï¼š  é›†ç¾¤æ‰¹é‡ç®¡ç†æ“ä½œå·¥å…·;
+    |   ä¸‰å¤§åŠŸèƒ½:   1ã€ssh å•ç‚¹/ç©¿è¡Œç™»å½• 
+    |               2ã€ssh æ‰¹é‡è¿œç¨‹å‘½ä»¤ 
+    |               3ã€scp æ‰¹é‡æ–‡ä»¶ä¸Šä¼ ä¸‹è½½
+    |         ä¼˜ç‚¹:é€šè¿‡é…ç½® åˆå§‹ç§˜é’¥æ–‡ä»¶,å’Œç»„æ“ä½œæ–‡ä»¶åˆ¶ä½œå‡ºåŠ å¯†æ–‡ä»¶,
+    |              #å®‰è£…ç®€å•ï¼švi $HOME/.bash_porfile
+    |         ç¼ºç‚¹:é…ç½®åˆå§‹ç§˜é’¥æ–‡ä»¶,å’Œç»„æ“ä½œæ–‡ä»¶,è„šæœ¬ä¸èƒ½åŠ å¯†
+    |              ç±»ä¼¼è½¯ä»¶: pssh | clushtershell | Ansible  
     |-----------------------------------------------------------------------------------------------------
     | 
     | Usage : $g_ScriptName [OPTION] ....
     | 
     | Options:
-    |     --help              °ïÖúĞÅÏ¢
-    |    *-g, --group         ×éÑ¡Ïî  | ×éÃû³Æ±êÇ©£»×éÅäÖÃÎÄ¼ş[]
-    |    *-g, --group         ×éÇåµ¥  | ÁĞ¾Ù³ö×éÃûÇåµ¥
-    |    *-h, --hosts         Ö÷»úÃû³Æ| all:ËùÓĞÖ÷»ú|Ö÷»úÅäÖÃÎÄ¼ş[]	
-    |    *-H, --hosts         Ö÷»úÇåµ¥| ÁĞ¾Ù³öÃû³ÆºÍIP	
-    |    *-U, --username      ÓÃ»§Ãû³Æ| ÎŞ¸ÃÑ¡Ïî-`whoami` »òÕß×é±êÇ©ÖĞÓÃ»§| all:ËùÓĞÓÃ»§   	
-    |    *-l, --login         µÇÂ¼±êÊ¶| ÎŞ²ÎÊı
-    |    *-c, --cmdsh         Ö´ĞĞÃüÁî| ÃüÁîÓĞ¿Õ¸ñµÄ¼ÓÒıºÅ:(×¢Òâµ¥Ë«ÒıºÅºÍ×ªÒå)                    
-    |    *-s, --scp           ÎÄ¼ş´«Êä| ·¢ËÍ:put:srcdir,destdir 
-    |                                 | »ñÈ¡:get:srcdir,destdir
-	|    *-S, --rsync         ÎÄ¼ş´«Êä|  S:Ê¹ÓÃrsync ÃüÁî Ğ¡s:Ê¹ÓÃscpÃüÁî 
-    |     -w, --passwd        ÃÜÂëÑ¡Ïî| Ê¹ÓÃ expect ¹¤¾ß×Ô¶¯Ìî³ä¿ÚÁî 
-    |     -W, --passwd        ÃÜÂëÑ¡Ïî| Ê¹ÓÃ sshpss  ¹¤¾ß×Ô¶¯Ìî³ä¿ÚÁî
-    |     -v, --version       ½Å±¾°æ±¾|                 
-    |     -L, --logleve       ÈÕÖ¾¼¶±ğ| debug:1; info:2; warn:3; error:4  ;#all:0 diss=8"    
-    |     -p, --port          Ö÷»ú¶Ë¿Ú| Ä¬:22   
-    |     -t,                 ½ø³ÌÊıÁ¿| Ä¬:10 ¡¢1-ÓÃÓÚµ÷ÊÔ 
-    |     -T, --timeout       ³¬Ê±Ê±¼ä| Ä¬:60 ¡¢   
-    |    #-a, --all           ËùÓĞÓÃ»§| ËùÓĞ×é(ÔİÎ´ÊµÏÖ)
-    |    #-x, --removel       ÅÅ³ıÖ÷»ú| ×éÃû| ¶à¸öÓÃ ¶ººÅ,·Ö¸î(ÔİÎ´ÊµÏÖ)
-    |     -k, --key           ÖÆ×÷Ö¤Êé| 
-    |     -K, --key           ÖÆ×÷»¥ĞÅ|²¢´«Êä»¥ĞÅÎÄ¼ş (Ö´ĞĞ¸Ã²½ÖèÊ±ÏÈÖ´ĞĞ -c 'id')
-    |     -E, --key           ±à¼­±¾½Å±¾|vi $g_PathFileName 
-    |    #-i, --install       °²×°½Å±¾| Ä¬ÈÏ°²×°Ä¿Â¼:$HOME/Zssh/bin 
-    |    #--clog              Çå³ıÈÕÖ¾| Çå³ı $g_ScriptName Ö´ĞĞµÄÈÕÖ¾
+    |     --help              å¸®åŠ©ä¿¡æ¯
+    |    *-g, --group         ç»„é€‰é¡¹  | ç»„åç§°æ ‡ç­¾ï¼›ç»„é…ç½®æ–‡ä»¶[]
+    |    *-g, --group         ç»„æ¸…å•  | åˆ—ä¸¾å‡ºç»„åæ¸…å•
+    |    *-h, --hosts         ä¸»æœºåç§°| all:æ‰€æœ‰ä¸»æœº|ä¸»æœºé…ç½®æ–‡ä»¶[]	
+    |    *-H, --hosts         ä¸»æœºæ¸…å•| åˆ—ä¸¾å‡ºåç§°å’ŒIP	
+    |    *-U, --username      ç”¨æˆ·åç§°| æ— è¯¥é€‰é¡¹-`whoami` æˆ–è€…ç»„æ ‡ç­¾ä¸­ç”¨æˆ·| all:æ‰€æœ‰ç”¨æˆ·   	
+    |    *-l, --login         ç™»å½•æ ‡è¯†| æ— å‚æ•°
+    |    *-c, --cmdsh         æ‰§è¡Œå‘½ä»¤| å‘½ä»¤æœ‰ç©ºæ ¼çš„åŠ å¼•å·:(æ³¨æ„å•åŒå¼•å·å’Œè½¬ä¹‰)                    
+    |    *-s, --scp           æ–‡ä»¶ä¼ è¾“| å‘é€:put:srcdir,destdir 
+    |                                 | è·å–:get:srcdir,destdir
+	|    *-S, --rsync         æ–‡ä»¶ä¼ è¾“|  S:ä½¿ç”¨rsync å‘½ä»¤ å°s:ä½¿ç”¨scpå‘½ä»¤ 
+    |     -w, --passwd        å¯†ç é€‰é¡¹| ä½¿ç”¨ expect å·¥å…·è‡ªåŠ¨å¡«å……å£ä»¤ 
+    |     -W, --passwd        å¯†ç é€‰é¡¹| ä½¿ç”¨ sshpss  å·¥å…·è‡ªåŠ¨å¡«å……å£ä»¤
+    |     -v, --version       è„šæœ¬ç‰ˆæœ¬|                 
+    |     -L, --logleve       æ—¥å¿—çº§åˆ«| debug:1; info:2; warn:3; error:4  ;#all:0 diss=8"    
+    |     -p, --port          ä¸»æœºç«¯å£| é»˜:22   
+    |     -t,                 è¿›ç¨‹æ•°é‡| é»˜:10 ã€1-ç”¨äºè°ƒè¯• 
+    |     -T, --timeout       è¶…æ—¶æ—¶é—´| é»˜:60 ã€   
+    |    #-a, --all           æ‰€æœ‰ç”¨æˆ·| æ‰€æœ‰ç»„(æš‚æœªå®ç°)
+    |    #-x, --removel       æ’é™¤ä¸»æœº| ç»„å| å¤šä¸ªç”¨ é€—å·,åˆ†å‰²(æš‚æœªå®ç°)
+    |     -k, --key           åˆ¶ä½œè¯ä¹¦| 
+    |     -K, --key           åˆ¶ä½œäº’ä¿¡|å¹¶ä¼ è¾“äº’ä¿¡æ–‡ä»¶ (æ‰§è¡Œè¯¥æ­¥éª¤æ—¶å…ˆæ‰§è¡Œ -c 'id')
+    |     -E, --key           ç¼–è¾‘æœ¬è„šæœ¬|vi $g_PathFileName 
+    |    #-i, --install       å®‰è£…è„šæœ¬| é»˜è®¤å®‰è£…ç›®å½•:$HOME/Zssh/bin 
+    |    #--clog              æ¸…é™¤æ—¥å¿—| æ¸…é™¤ $g_ScriptName æ‰§è¡Œçš„æ—¥å¿—
     | Exit status
     |      0      OK
     |      !=0    ERROR
     | 
     | Example:
-    |     1) µÇÂ¼: ssh --port=22 UserName@IPADDR
+    |     1) ç™»å½•: ssh --port=22 UserName@IPADDR
     | 
-    |       A)Ê¹ÓÃÃØÔ¿ÎÄ¼ş×Ô¶¯µÇÂ¼
+    |       A)ä½¿ç”¨ç§˜é’¥æ–‡ä»¶è‡ªåŠ¨ç™»å½•
     |         $g_ScriptName -lW -h hostname -U userName  
-    |         $g_ScriptName -lw -h hostname -U userName  #µÇÂ¼»ºÂı
-    |       B)´®ĞĞµÇÂ¼ groupApp ×é
+    |         $g_ScriptName -lw -h hostname -U userName  #ç™»å½•ç¼“æ…¢
+    |       B)ä¸²è¡Œç™»å½• groupApp ç»„
     |         $g_ScriptName -lW -g groupApp -U userName  
     |      
-    |     2) Ö´ĞĞÃüÁî
+    |     2) æ‰§è¡Œå‘½ä»¤
     | 
-    |       A) Ö´ĞĞ id ÃüÁî
+    |       A) æ‰§è¡Œ id å‘½ä»¤
     |         $g_ScriptName -W -h hostname -U userName  -c 'id'
-    |       B)²¢ĞĞ Ö´ĞĞ id ÃüÁî
+    |       B)å¹¶è¡Œ æ‰§è¡Œ id å‘½ä»¤
     |        $g_ScriptName -W -g groupApp  -U userName  -c 'id'
-	|        $g_ScriptName -W -h all  -U all  -c 'id'  #ÒÑÖªËùÓĞIP ¼°ËùÓĞÓÃ»§Ö´ĞĞ
+	|        $g_ScriptName -W -h all  -U all  -c 'id'  #å·²çŸ¥æ‰€æœ‰IP åŠæ‰€æœ‰ç”¨æˆ·æ‰§è¡Œ
     |      
     | 
-    |     3)get file£ºÏÂÔØÎÄ¼ş(×¢Òâ¶à½ÚµãÏÂ¸²¸Ç)
-    |       SCP  £º   $g_ScriptName -W -h hostname -s get:/destdir/file:/srcdir/ 
-    |       RSYNC£º   $g_ScriptName -W -h hostname -S get:/destdir/file:/srcdir/ 
-    |        - ×é
+    |     3)get fileï¼šä¸‹è½½æ–‡ä»¶(æ³¨æ„å¤šèŠ‚ç‚¹ä¸‹è¦†ç›–)
+    |       SCP  ï¼š   $g_ScriptName -W -h hostname -s get:/destdir/file:/srcdir/ 
+    |       RSYNCï¼š   $g_ScriptName -W -h hostname -S get:/destdir/file:/srcdir/ 
+    |        - ç»„
     |        SCP  : $g_ScriptName -W -g groupApp   -s get:/destdir/file:/srcdir/ 
 	|        RSYNC: $g_ScriptName -W -g groupApp   -S get:/destdir/file:/srcdir/ 
 	|
-    |     4)put file£º ½«±¾µØÎÄ¼şÉÏ´«ÖÁÄ¿±ê»ú
+    |     4)put fileï¼š å°†æœ¬åœ°æ–‡ä»¶ä¸Šä¼ è‡³ç›®æ ‡æœº
     |        SCP  : $g_ScriptName -W -h hostname -s put:~/srcdir/file:~/destdir/ 
 	|        RSYNC: $g_ScriptName -W -h hostname -S put:~/srcdir/file:~/destdir/ 
-    |        - ×é
+    |        - ç»„
     |        SCP  : $g_ScriptName -W -g groupApp -s put:~/srcdir/file:~/destdir/ 
 	|        RSYNC: $g_ScriptName -W -g groupApp -S put:~/srcdir/file:~/destdir/ 
 	|
-    |     5)key file:ÖÆ×÷ÃÜÔ¿
+    |     5)key file:åˆ¶ä½œå¯†é’¥
     |          $__ScriptName  -k
-    |         ÅäÖÃÎÄ¼ş[]²»´æÔÚÇëÔÚ60sÄÚÊäÈë:Zssh/bin/.hosts.cfg 
-    |         ÊäÈëĞÅÏ¢Îª:[Zssh/bin/.hosts.cfg]
-    |         !!!! Ö¤ÊéÖÆ×÷³É¹¦ !!!
+    |         é…ç½®æ–‡ä»¶[]ä¸å­˜åœ¨è¯·åœ¨60så†…è¾“å…¥:Zssh/bin/.hosts.cfg 
+    |         è¾“å…¥ä¿¡æ¯ä¸º:[Zssh/bin/.hosts.cfg]
+    |         !!!! è¯ä¹¦åˆ¶ä½œæˆåŠŸ !!!
     |     
-    |          ¸ù¾İÌáÊ¾ÊäÈë£ºÎÄ¼şÃû³Æ ÄÚÈİ¸ñÊ½ÈçÏÂ£º
+    |          æ ¹æ®æç¤ºè¾“å…¥ï¼šæ–‡ä»¶åç§° å†…å®¹æ ¼å¼å¦‚ä¸‹ï¼š
     |          cat  $__ScripHosts.Example    
     |
-    |     6)ÖÆ×÷»¥ĞÅ
-    |       A) Ö´ĞĞ id ÃüÁî
+    |     6)åˆ¶ä½œäº’ä¿¡
+    |       A) æ‰§è¡Œ id å‘½ä»¤
     |         $g_ScriptName -W -h all  -U all  -c 'id'
-    |       B) ¿ªÊ¼»¥ĞÅ ËùÓĞ IP ¼° ËùÓĞÓÃ»§
+    |       B) å¼€å§‹äº’ä¿¡ æ‰€æœ‰ IP åŠ æ‰€æœ‰ç”¨æˆ·
     |         $g_ScriptName -W -h all  -U all  -K
-    |       c) ¿ªÊ¼»¥ĞÅ app ×é ¼° ËùÓĞÓÃ»§
+    |       c) å¼€å§‹äº’ä¿¡ app ç»„ åŠ æ‰€æœ‰ç”¨æˆ·
     |         $g_ScriptName -W -g app  -U all  -K
 	|
-    |     7)User_Group file£º×éÎÄ¼ş
+    |     7)User_Group fileï¼šç»„æ–‡ä»¶
     |             cat  $__ScriptConf.Example 
-    |         ×¢Òâ:base64_keyÎª³õÊ¼ÃØÔ¿¿ÚÁî´®½öÔÚÖÆ×÷Ö¤ÊéÊ±ÓĞĞ§¡£
-    |              ¸Ã¿ÚÁî²¢²»ÄÜ½âÃÜÖ¤Êé¡£     
+    |         æ³¨æ„:base64_keyä¸ºåˆå§‹ç§˜é’¥å£ä»¤ä¸²ä»…åœ¨åˆ¶ä½œè¯ä¹¦æ—¶æœ‰æ•ˆã€‚
+    |              è¯¥å£ä»¤å¹¶ä¸èƒ½è§£å¯†è¯ä¹¦ã€‚     
     | 
     | Report bugs to 123456789@qq.com          
     |                                                         ZhangTianhe  
-    |                                                         2018Äê 08ÔÂ 21ÈÕ ĞÇÆÚ¶ş 08:48:35 CST
+    |                                                         2018å¹´ 08æœˆ 21æ—¥ æ˜ŸæœŸäºŒ 08:48:35 CST
     |______________________________________________________________________________________________
 EOT
 #echo -e "\e[0m\n"	
@@ -314,7 +320,7 @@ EOT
 
 ################################################
 # Function: init_getopt
-# Description: ²ÎÊı½âÎö
+# Description: å‚æ•°è§£æ
 # Parameter:
 #     input:
 #     N/A
@@ -325,12 +331,12 @@ EOT
 #################################################
 init_getopt()
 {
-    showLog_diss "${LINENO}" "------¿ªÊ¼³õÊ¼»¯ÊäÈë²ÎÊı[$@]----------"
+    showLog_diss "${LINENO}" "------å¼€å§‹åˆå§‹åŒ–è¾“å…¥å‚æ•°[$@]----------"
 	#----------------------------------------------------------------------------------
-	# ½âÎö²ÎÊı:
-	# ¶ÁÈ¡ÅäÖÃ£º
-	# ¶ÁÈ¡Host: ½âÎö³ö Ô´¡¢Ä¿±ê Êı¾İ¿â²ÎÊı
-	# ¶ÁÈ¡tables: ±éÀúÊı¾İ
+	# è§£æå‚æ•°:
+	# è¯»å–é…ç½®ï¼š
+	# è¯»å–Host: è§£æå‡º æºã€ç›®æ ‡ æ•°æ®åº“å‚æ•°
+	# è¯»å–tables: éå†æ•°æ®
 	 opt_A=''; opt_a=''; opt_A_flag=0;opt_a_flag=0;
 	 opt_B=''; opt_b=''; opt_B_flag=0;opt_b_flag=0;
 	 opt_C=''; opt_c=''; opt_C_flag=0;opt_c_flag=0;
@@ -342,7 +348,7 @@ init_getopt()
 	 opt_I=''; opt_i=''; opt_I_flag=0;opt_i_flag=0;
 	 opt_J=''; opt_j=''; opt_J_flag=0;opt_j_flag=0;
 	 opt_K=''; opt_k=''; opt_K_flag=0;opt_k_flag=0;
-	 opt_L=''; opt_l=''; opt_L_flag=0;opt_l_flag=0;  #µÇÂ¼ 1-µÇÂ¼
+	 opt_L=''; opt_l=''; opt_L_flag=0;opt_l_flag=0;  #ç™»å½• 1-ç™»å½•
 	 opt_M=''; opt_m=''; opt_M_flag=0;opt_m_flag=0;
 	 opt_N=''; opt_n=''; opt_N_flag=0;opt_n_flag=0;
 	 opt_O=''; opt_o=''; opt_O_flag=0;opt_o_flag=0;
@@ -358,10 +364,10 @@ init_getopt()
 	 opt_Z=''; opt_z=''; opt_Z_flag=0;opt_z_flag=0;
 	
 	#-----------------------------------------
-    PORT_STR="22" #¶Ë¿ÚÃû³Æ 	   
+    PORT_STR="22" #ç«¯å£åç§° 	   
     PASSD_FLAG=0; 
 	
-    #´«Êä
+    #ä¼ è¾“
     OptRsyncFlag=0
     SCP_STR=0  	     #get:srcdirfile:local_dir 
     SCP_PUT_GET=""   #get|put
@@ -452,12 +458,12 @@ init_getopt()
             -k | --key 		) showLog_diss "${LINENO}" "!!!! $g_ScriptBase64 !!!";
 			                  rm -f $g_ScriptBase64;
 			                  creat_base64 ;
-							  showLog_diss "${LINENO}" "!!!! Ö¤ÊéÖÆ×÷³É¹¦ !!!";exit;;		
-            -K | --ssh-key  ) showLog_diss "${LINENO}" "!!!! ÖÆ×÷´«Êä»¥ĞÅ !!!";
+							  showLog_diss "${LINENO}" "!!!! è¯ä¹¦åˆ¶ä½œæˆåŠŸ !!!";exit;;		
+            -K | --ssh-key  ) showLog_diss "${LINENO}" "!!!! åˆ¶ä½œä¼ è¾“äº’ä¿¡ !!!";
 			                  ssh_key;
 			                  opt_K_flag=1;
                               shift 1 ;;
-            --install		) install_zsh ;showLog_diss "${LINENO}" "!!!°²×°Íê³É!!!";exit;;
+            --install		) install_zsh ;showLog_diss "${LINENO}" "!!!å®‰è£…å®Œæˆ!!!";exit;;
             --clog			) echo "file_num[`ls $_dirlog | wc -l`]|[`du -sh $_dirlog`]"
                               find $_dirlog/* -cmin +0 |grep -v "bash"| xargs rm -f  #>/dev/null 2>&1 &
                               showLog_diss "${LINENO}" "file_num[`ls $_dirlog | wc -l`]|[`du -sh $_dirlog`]"
@@ -481,24 +487,24 @@ ssh_key(){
 
 #----------------------------------
 #
-# ²ÎÊı¼ì²é
+# å‚æ•°æ£€æŸ¥
 #
 #----------------------------------
 
 check_argv()
 {
   if   [ 0 -eq $opt_l_flag ] && [ 0 -eq $opt_c_flag ] && [ 0 -eq $opt_s_flag ] && [ 0 -eq $opt_K_flag ];then
-       showLog_error "${LINENO}" " $g_ScriptName È±ÉÙ[  -l | -c | -s | -K ] ²ÎÊı"
+       showLog_error "${LINENO}" " $g_ScriptName ç¼ºå°‘[  -l | -c | -s | -K ] å‚æ•°"
 	   exit -1;
   fi
   
   if  [ 0 -eq $opt_g_flag ] && [ 0 -eq $opt_h_flag ];then
-       showLog_error "${LINENO}" " $g_ScriptName È±ÉÙ[  -g | -h  ] ²ÎÊı"
+       showLog_error "${LINENO}" " $g_ScriptName ç¼ºå°‘[  -g | -h  ] å‚æ•°"
 	   exit -1;
   fi
   
   if   [ 1 -eq $opt_h_flag ]  && [ 0 -eq $opt_U_flag ];then
-       showLog_error "${LINENO}" " $g_ScriptName  -h Ê±  È±ÉÙ[  -U  ] ²ÎÊı"
+       showLog_error "${LINENO}" " $g_ScriptName  -h æ—¶  ç¼ºå°‘[  -U  ] å‚æ•°"
 	   exit -1;
   fi
   
@@ -509,7 +515,7 @@ check_argv()
      fi
     
      if [ ! -e "$SCP_LOC_STR" ];then
-         showLog_error "${LINENO}" "SCP_LOC_STR=[${SCP_LOC_STR}] ²»´æÔÚ"
+         showLog_error "${LINENO}" "SCP_LOC_STR=[${SCP_LOC_STR}] ä¸å­˜åœ¨"
         exit -1
      fi
   fi
@@ -519,38 +525,38 @@ check_argv()
 
 ################################################
 # Function: init_hosts_argv
-# Description: ²ÎÊı¶ş´Î½âÎö-×é½âÎö
+# Description: å‚æ•°äºŒæ¬¡è§£æ-ç»„è§£æ
 # Parameter:
 #     input:
 #     N/A
-#     output: HOST_STRS_ARGV Ö÷»úÃû³ÆÁĞ±í
+#     output: HOST_STRS_ARGV ä¸»æœºåç§°åˆ—è¡¨
 #     N/A
 # Return: 0 -- success; not 0 -- failure
 # Others: N/A
 #################################################
 #-g
 init_hosts_argv(){
-     showLog_info "${LINENO}" "½âÎö×éÅäÖÃÎÄ¼ş"
-	 #»ñÈ¡¶¨Î»·ûºÅ
-	 GROUP_CONF=${g_ScriptGroup} ; #×éÅäÖÃÎÄ¼ş
-	 GROUP_FlagName=($opt_g); #×é±êÇ©Ãû"group1,greup2"
-	 GROUP_UserName=${opt_U}; #×éÓÃ»§Ãû
-	 GROUP_HostList=        ; #×éÖ÷»úÇåµ¥
-	 IPUserPasslist=        ; #¼´½«´¦ÀíµÄÇåµ¥ÁĞ±í"IP0:U:P,IP1:U:P"
-	 HOSTS_CONF=${g_ScriptHosts} ; #Ö÷»úÅäÖÃÎÄ¼ş
+     showLog_info "${LINENO}" "è§£æç»„é…ç½®æ–‡ä»¶"
+	 #è·å–å®šä½ç¬¦å·
+	 GROUP_CONF=${g_ScriptGroup} ; #ç»„é…ç½®æ–‡ä»¶
+	 GROUP_FlagName=($opt_g); #ç»„æ ‡ç­¾å"group1,greup2"
+	 GROUP_UserName=${opt_U}; #ç»„ç”¨æˆ·å
+	 GROUP_HostList=        ; #ç»„ä¸»æœºæ¸…å•
+	 IPUserPasslist=        ; #å³å°†å¤„ç†çš„æ¸…å•åˆ—è¡¨"IP0:U:P,IP1:U:P"
+	 HOSTS_CONF=${g_ScriptHosts} ; #ä¸»æœºé…ç½®æ–‡ä»¶
 
-	 GROUPs_BEGIN_NUM=0   #×é¿ªÊ¼ĞĞºÅ
-	 GROUPs_END_NUM=0     #×é½áÊøĞĞºÅ
-	 #Èç¹ûÓĞ×é²ÎÊıÔò½âÎö
+	 GROUPs_BEGIN_NUM=0   #ç»„å¼€å§‹è¡Œå·
+	 GROUPs_END_NUM=0     #ç»„ç»“æŸè¡Œå·
+	 #å¦‚æœæœ‰ç»„å‚æ•°åˆ™è§£æ
    
 	if [ 1 -eq $opt_g_flag ];then  
-	    opt_g_flag=0  #ÖØÖÃÎªÁã
-        showLog_debug "${LINENO}" "opt_g_flag=${opt_g_flag} ×é²ÎÊıÔò½âÎö";
+	    opt_g_flag=0  #é‡ç½®ä¸ºé›¶
+        showLog_debug "${LINENO}" "opt_g_flag=${opt_g_flag} ç»„å‚æ•°åˆ™è§£æ";
 		
-		GROUPs_BEGIN_NUM=`sed -n "/^\[\<${GROUP_FlagName}\>\]/{=}"	$GROUP_CONF`  #»ñÈ¡×é¿ªÊ¼Î»ÖÃĞĞºÅ
-		GROUPs_EOF_NUM=`sed -n '${=}'	$GROUP_CONF`  #×îºóÒ»ĞĞĞĞºÅ
+		GROUPs_BEGIN_NUM=`sed -n "/^\[\<${GROUP_FlagName}\>\]/{=}"	$GROUP_CONF`  #è·å–ç»„å¼€å§‹ä½ç½®è¡Œå·
+		GROUPs_EOF_NUM=`sed -n '${=}'	$GROUP_CONF`  #æœ€åä¸€è¡Œè¡Œå·
 	    if [ -z "$GROUPs_BEGIN_NUM" ];then 
-		   showLog_error "${LINENO}" "GROUPs_BEGIN_NUM is [${GROUPs_BEGIN_NUM}]| -g [$opt_g] ×é±êÇ©Ã»ÓĞÕÒµ½ [$GROUP_CONF]"  
+		   showLog_error "${LINENO}" "GROUPs_BEGIN_NUM is [${GROUPs_BEGIN_NUM}]| -g [$opt_g] ç»„æ ‡ç­¾æ²¡æœ‰æ‰¾åˆ° [$GROUP_CONF]"  
 		   exit -1
 		fi
 		
@@ -572,7 +578,7 @@ init_hosts_argv(){
 				    GROUP_HostList="${GROUP_HostList}|$(echo $tmpStr|cut -d"=" -f2 )"
 				    GROUP_HostList="$(echo "${GROUP_HostList}"|sed -e 's/^|//g' -e 's/|$//g'  )"
 					showLog_hide "${LINENO}" "2===>GROUP_HostList=>$GROUP_HostList<"
-					opt_g_flag=1  #ÓĞ²ÎÊıÊ±Îª1
+					opt_g_flag=1  #æœ‰å‚æ•°æ—¶ä¸º1
 			;;
 			*)
 				showLog_debug "${LINENO}" "4===>continue tmpStr=>$tmpStr<"
@@ -583,38 +589,38 @@ init_hosts_argv(){
 	fi
 	showLog_debug "${LINENO}" "0==>i=[${i}]|${GROUPs_BEGIN_NUM},${GROUPs_END_NUM}|-U $GROUP_UserName|GROUP_HostList=>${GROUP_HostList}<"
 	
-	OptHost="$opt_h" #Ö÷»úÃûÎ¨Ò»
-    OptUser="$opt_U" #È·¶¨ÓÃ»§
-    #Èç¹ûÓĞÖ÷»ú-h  ²ÎÊıÔò½âÎö
+	OptHost="$opt_h" #ä¸»æœºåå”¯ä¸€
+    OptUser="$opt_U" #ç¡®å®šç”¨æˆ·
+    #å¦‚æœæœ‰ä¸»æœº-h  å‚æ•°åˆ™è§£æ
  
-   #Ã»ÓĞÓÃ»§²ÎÊıÊ±Ê¹ÓÃÅäÖÃÎÄ¼şÖĞµÄ²ÎÊı
+   #æ²¡æœ‰ç”¨æˆ·å‚æ•°æ—¶ä½¿ç”¨é…ç½®æ–‡ä»¶ä¸­çš„å‚æ•°
 	if [ 0 -eq ${opt_U_flag} ];then 
 	       OptUser="$GROUP_UserName"  ;
           if [ -z $OptUser ];then
-            showLog_error "${LINENO}" " $g_ScriptName  -g  Ê± Ã»ÕÒµ½ÓÃ»§ĞèÒª [  -U  ] ²ÎÊı"
+            showLog_error "${LINENO}" " $g_ScriptName  -g  æ—¶ æ²¡æ‰¾åˆ°ç”¨æˆ·éœ€è¦ [  -U  ] å‚æ•°"
             exit -1;
           fi
-	fi  #È·¶¨ÓÃ»§	
+	fi  #ç¡®å®šç”¨æˆ·	
 		
    if [ 1 -eq ${opt_h_flag} ];then
-		OptHost="$opt_h" #Ö÷»úÃûÎ¨Ò» 
+		OptHost="$opt_h" #ä¸»æœºåå”¯ä¸€ 
 		if [ "all" == "${OptHost}" ];then
 		  
           GROUP_HostList="$(echo "${GROUP_HostList}|.*"|sed -e 's/^|//g' -e 's/|$//g'  )"
-		  showLog_debug "${LINENO}" "»ñÈ¡hosts=${OptHost}[egrep -i \"\\<${GROUP_HostList}\\>\"  $HOSTS_CONF]";
+		  showLog_debug "${LINENO}" "è·å–hosts=${OptHost}[egrep -i \"\\<${GROUP_HostList}\\>\"  $HOSTS_CONF]";
 		else
 		
           GROUP_HostList="$(echo "${GROUP_HostList}|${OptHost}"|sed -e 's/^|//g' -e 's/|$//g'  )"
-		  showLog_debug "${LINENO}" "»ñÈ¡hosts=${GROUP_UserName}@${OptHost}[egrep -i \"\\<${GROUP_HostList}\\>\"  $HOSTS_CONF]";
+		  showLog_debug "${LINENO}" "è·å–hosts=${GROUP_UserName}@${OptHost}[egrep -i \"\\<${GROUP_HostList}\\>\"  $HOSTS_CONF]";
 		fi   
     else
 	    if [ 0 -eq $opt_g_flag ];then
-	        showLog_warn "${LINENO}" " ²ÎÊı -g [$opt_g] ×é±êÇ©Ã»ÓĞÕÒµ½[$GROUP_CONF]  "
+	        showLog_warn "${LINENO}" " å‚æ•° -g [$opt_g] ç»„æ ‡ç­¾æ²¡æœ‰æ‰¾åˆ°[$GROUP_CONF]  "
 		    exit -1;
         fi	
 	fi
     
-     showLog_info "${LINENO}" "»ñÈ¡GROUP_UserName=${GROUP_UserName}|OptHost=${OptHost}[egrep -i \"\\<${GROUP_HostList}\\>\"  $HOSTS_CONF]";
+     showLog_info "${LINENO}" "è·å–GROUP_UserName=${GROUP_UserName}|OptHost=${OptHost}[egrep -i \"\\<${GROUP_HostList}\\>\"  $HOSTS_CONF]";
      showLog_trace "${LINENO}" "openssl aes-128-cbc -k $keys -base64 -d -in $g_ScriptBase64 |egrep -i \"\<${GROUP_HostList}\>\" "
     {
 	 
@@ -633,7 +639,7 @@ init_hosts_argv(){
 				else 
 				    OptHost="$opt_h"
 				fi
-				showLog_all "${LINENO}" "»ñÈ¡GROUP_UserName=${GROUP_UserName}|OptHost=${OptHost}|${HostName}";
+				showLog_all "${LINENO}" "è·å–GROUP_UserName=${GROUP_UserName}|OptHost=${OptHost}|${HostName}";
 				case $OptHost in
 				    "${HostName}" | "all" )
 					   {
@@ -643,7 +649,7 @@ init_hosts_argv(){
                             UserName=${UKey%%/*}
                             UserKey=${UKey#*/}
                             #showLog_trace "${LINENO}" "===>Line:IpStr=$IpStr  -U $UserName -h $HostName  -k $UserKey"   
-                            #´Ë´¦ÉèÖÃÓÃ»§Ãû¹ıÂË:
+                            #æ­¤å¤„è®¾ç½®ç”¨æˆ·åè¿‡æ»¤:
 				        	
 				        	case  $OptUser in
 				        	  "${UserName}" | "all" )showLog_debug "${LINENO}" "$HostName $IpStr  $UserName OK"
@@ -652,11 +658,11 @@ init_hosts_argv(){
                               *                     )  continue;;					  
 				        	esac
                             
-				        	#¸ù¾İ²»Í¨µÄ²ÎÊıµ÷ÓÃ²»Í¬µÄº¯Êı
+				        	#æ ¹æ®ä¸é€šçš„å‚æ•°è°ƒç”¨ä¸åŒçš„å‡½æ•°
                         done
                         fi
 					  };;
-				   *  ) showLog_debug "${LINENO}" "Ö÷»úÃû[$OptHost != $HostName]²»´æÔÚÇë²Î¿¼£º${g_ScriptHosts}"  ;continue;;
+				   *  ) showLog_debug "${LINENO}" "ä¸»æœºå[$OptHost != $HostName]ä¸å­˜åœ¨è¯·å‚è€ƒï¼š${g_ScriptHosts}"  ;continue;;
 				esac
             fi
         done 
@@ -669,7 +675,7 @@ init_hosts_argv(){
 		showLog_debug  "${LINENO}" "IPUserPasslist[${#IPUserPasslist[@]}]=[\${IPUserPasslist[@]}]" 
     }
 	if [ 0 -eq  ${#IPUserPasslist[@]} ];then 
-	    showLog_warn  "${LINENO}" "»ñÈ¡µ½Òª´¦ÀíµÄÇåµ¥Îª¿Õ£ºIPUserPasslist is [${#IPUserPasslist[@]}]" 
+	    showLog_warn  "${LINENO}" "è·å–åˆ°è¦å¤„ç†çš„æ¸…å•ä¸ºç©ºï¼šIPUserPasslist is [${#IPUserPasslist[@]}]" 
 		exit -1;
 	fi
 	showLog_diss "${LINENO}" "SUM:[${#IPUserPasslist[@]}]=[\${IPUserPasslist[@]}]" 
@@ -681,17 +687,17 @@ init_hosts_argv(){
 
 init_printf(){
 
-showLog_all "${LINENO}" "µ÷ÊÔ¹«¹²±äÁ¿--------------$keys-----------"
-showLog_all "${LINENO}" "g_OIFS                                     #·Ö¸ô·û"
-showLog_all "${LINENO}" "g_SrcDir       =${g_SrcDir}                #µ±Ç°Ö´ĞĞÄ¿Â¼"
-showLog_all "${LINENO}" "g_PathFileName =${g_PathFileName}          #µ±Ç°ÃüÁîÖ´ĞĞ½Å±¾È«Â·¾¶¼°Ä¿Â¼"
-showLog_all "${LINENO}" "g_FileName     =${g_FileName}              #µ±Ç°½Å±¾ÎÄ¼şÃû"
-showLog_all "${LINENO}" "g_curPath      =${g_curPath}               #µ±Ç°½Å±¾ËùÔÚÄ¿Â¼"
-showLog_all "${LINENO}" "g_logPath      =${g_logPath}               #ÈÕÖ¾Â·¾¶"
-showLog_all "${LINENO}" "g_logFile      =${g_logFile}               #ÈÕÖ¾ÎÄ¼şÃû³Æ"
-showLog_all "${LINENO}" "g_logLevel=${g_logLevel}                   #µ±Ç°½Å±¾ÈÕÖ¾¼¶±ğ: debug:1; info:2; warn:3; error:4  ;#all:0 diss=8"
-showLog_all "${LINENO}" "g_ScriptName=${g_ScriptName}               #½Å±¾ÄÚ²¿ÎÄ¼şÃû"
-showLog_all "${LINENO}" "g_srciptVersion=${g_srciptVersion}         #½Å±¾°æ±¾ºÅ"
+showLog_all "${LINENO}" "è°ƒè¯•å…¬å…±å˜é‡--------------$keys-----------"
+showLog_all "${LINENO}" "g_OIFS                                     #åˆ†éš”ç¬¦"
+showLog_all "${LINENO}" "g_SrcDir       =${g_SrcDir}                #å½“å‰æ‰§è¡Œç›®å½•"
+showLog_all "${LINENO}" "g_PathFileName =${g_PathFileName}          #å½“å‰å‘½ä»¤æ‰§è¡Œè„šæœ¬å…¨è·¯å¾„åŠç›®å½•"
+showLog_all "${LINENO}" "g_FileName     =${g_FileName}              #å½“å‰è„šæœ¬æ–‡ä»¶å"
+showLog_all "${LINENO}" "g_curPath      =${g_curPath}               #å½“å‰è„šæœ¬æ‰€åœ¨ç›®å½•"
+showLog_all "${LINENO}" "g_logPath      =${g_logPath}               #æ—¥å¿—è·¯å¾„"
+showLog_all "${LINENO}" "g_logFile      =${g_logFile}               #æ—¥å¿—æ–‡ä»¶åç§°"
+showLog_all "${LINENO}" "g_logLevel=${g_logLevel}                   #å½“å‰è„šæœ¬æ—¥å¿—çº§åˆ«: debug:1; info:2; warn:3; error:4  ;#all:0 diss=8"
+showLog_all "${LINENO}" "g_ScriptName=${g_ScriptName}               #è„šæœ¬å†…éƒ¨æ–‡ä»¶å"
+showLog_all "${LINENO}" "g_srciptVersion=${g_srciptVersion}         #è„šæœ¬ç‰ˆæœ¬å·"
 showLog_all "${LINENO}" "g_curPath=${g_curPath}"
 showLog_all "${LINENO}" "g_scriptName=${g_scriptName}"
 showLog_all "${LINENO}" "g_setup_tool_package_home=${g_setup_tool_package_home}"
@@ -703,11 +709,11 @@ showLog_all "${LINENO}" "g_dirSlib=${g_dirSlib}";
 showLog_all "${LINENO}" "g_dirSbin=${g_dirSbin}";
 showLog_all "${LINENO}" "g_dirDat= ${g_dirDat} ";
 showLog_all "${LINENO}" "g_dirDatE=${g_dirDatE}";
-showLog_all "${LINENO}" "g_ScriptHosts =${g_ScriptHosts}  #Ö÷»úÅäÖÃÎÄ¼şĞÅÏ¢"
-showLog_all "${LINENO}" "g_ScriptConf  =${g_ScriptConf}   #ÓÃ»§×éÅäÖÃÎÄ¼ş  "
-showLog_all "${LINENO}" "g_ScriptTables=${g_ScriptTables} #Ç¨ÒÆµÄ±íÇåµ¥    "
-showLog_all "${LINENO}" "g_logFile     =${g_logFile}      #ÈÕÖ¾ÎÄ¼şÃû      "
-showLog_all "${LINENO}" "µ÷ÊÔÊäÈë²ÎÊıÑ¡Ïî-----"
+showLog_all "${LINENO}" "g_ScriptHosts =${g_ScriptHosts}  #ä¸»æœºé…ç½®æ–‡ä»¶ä¿¡æ¯"
+showLog_all "${LINENO}" "g_ScriptConf  =${g_ScriptConf}   #ç”¨æˆ·ç»„é…ç½®æ–‡ä»¶  "
+showLog_all "${LINENO}" "g_ScriptTables=${g_ScriptTables} #è¿ç§»çš„è¡¨æ¸…å•    "
+showLog_all "${LINENO}" "g_logFile     =${g_logFile}      #æ—¥å¿—æ–‡ä»¶å      "
+showLog_all "${LINENO}" "è°ƒè¯•è¾“å…¥å‚æ•°é€‰é¡¹-----"
 showLog_all "${LINENO}" "opt_A=${opt_A}; opt_a=${opt_a}; opt_A_flag=${opt_A_flag};opt_a_flag=${opt_a_flag}";
 showLog_all "${LINENO}" "opt_B=${opt_B}; opt_b=${opt_b}; opt_B_flag=${opt_B_flag};opt_b_flag=${opt_b_flag}";
 showLog_all "${LINENO}" "opt_C=${opt_C}; opt_c=${opt_c}; opt_C_flag=${opt_C_flag};opt_c_flag=${opt_c_flag}";
@@ -741,29 +747,29 @@ init_all(){
 
 
     #--------------------------------------#
-	#   ¿ªÊ¼ÔËĞĞ½Å±¾                       #
+	#   å¼€å§‹è¿è¡Œè„šæœ¬                       #
 	#--------------------------------------#
-	echo "${LINENO}" "-----¿ªÊ¼ÔËĞĞ½Å±¾[$g_ScriptName $@]"
+	echo "${LINENO}" "-----å¼€å§‹è¿è¡Œè„šæœ¬[$g_ScriptName $@]"
     init_path
 	
 	#echo "${LINENO}" "Set LOG   :$@"
     init_log
 	
 	if [ $# -eq 0 ];then showLog_diss "${LINENO}" "Usage" ; Usage;exit;fi
-    showLog_info "${LINENO}" "------¿ªÊ¼³õÊ¼»¯ÊäÈë²ÎÊı[$@]----------"
+    showLog_info "${LINENO}" "------å¼€å§‹åˆå§‹åŒ–è¾“å…¥å‚æ•°[$@]----------"
 	init_getopt "$@"
     check_argv "$@" 
 	showLog_all "${LINENO}" "getopt_printf"
 	init_printf 
 	
-	showLog_info "${LINENO}" "init_hosts_argv »ñÈ¡Á¬½ÓĞÅÏ¢"
+	showLog_info "${LINENO}" "init_hosts_argv è·å–è¿æ¥ä¿¡æ¯"
 	init_hosts_argv
 }
 
 
 #-----------------------------
 #
-#  µÇÂ¼Ô¶³ÌÖÕ¶Ë
+#  ç™»å½•è¿œç¨‹ç»ˆç«¯
 #
 #------------------------------
 #spawn ssh -o 'stricthostkeychecking=no' -p $PORT_STR  $USER_STR@$HOSTS_IP
@@ -815,8 +821,8 @@ ssh_copy_id(){
 
 #-----------------------------
 #
-#  Ö´ĞĞÔ¶³ÌÃüÁî
-#  Ö´ĞĞÃüÁî³¬Ê±180s
+#  æ‰§è¡Œè¿œç¨‹å‘½ä»¤
+#  æ‰§è¡Œå‘½ä»¤è¶…æ—¶180s
 #------------------------------
 
 ssh_cmd(){
@@ -835,9 +841,9 @@ ssh_cmd(){
 
    ;;
    2 ) #"stricthostkeychecking=no" yes/no
-       #ConnectTimeout=5 Á¬½Ó³¬Ê±Ê±¼ä
-       #ServerAliveInterval ¶àÉÙÊ±¼ä´Ó·¢ËÍÒ»´ÎÇëÇó
-       #ServerAliveCountMax ´ÎÊı;ps -ef|grep '${USER_STR}@notty'|grep sshd|awk '{print $2}'|xargs kill -9 ";;
+       #ConnectTimeout=5 è¿æ¥è¶…æ—¶æ—¶é—´
+       #ServerAliveInterval å¤šå°‘æ—¶é—´ä»å‘é€ä¸€æ¬¡è¯·æ±‚
+       #ServerAliveCountMax æ¬¡æ•°;ps -ef|grep '${USER_STR}@notty'|grep sshd|awk '{print $2}'|xargs kill -9 ";;
        ${g_dirBin}/sshpass -p ${PASSWD_STR} ssh -o "stricthostkeychecking=no" -o ConnectTimeout=5  -p ${PORT_STR}  ${USER_STR}@${HOSTS_IP} ". ~/.*profile>/dev/null 2>&1;hostname;$CMD_STR" ;;
   * )
 
@@ -846,7 +852,7 @@ ssh_cmd(){
    ;;
    esac
    )
- showLog_diss "${LINENO}" "´¦ÀíÍê³É¶Ï¿ªÁ¬½Ó"
+ showLog_diss "${LINENO}" "å¤„ç†å®Œæˆæ–­å¼€è¿æ¥"
 }
 
 
@@ -855,7 +861,7 @@ ssh_cmd(){
 
 #-----------------------------
 #
-#  ÏÂÔØÎÄ¼ş
+#  ä¸‹è½½æ–‡ä»¶
 #
 #------------------------------
 scp_get(){
@@ -902,7 +908,7 @@ expect<<!
 
 #-----------------------------
 #
-#  ÉÏ´«ÎÄ¼ş
+#  ä¸Šä¼ æ–‡ä»¶
 #
 #------------------------------
 	
@@ -959,11 +965,11 @@ MAIN_CMD(){
   PASSWD_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $3}'`
   
   # login
-  if   [ 1 -eq $LOGIN_FLAG   ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_login :¿ªÊ¼Ö´ĞĞ[$($g_FmtTimes)]"    ; ssh_login ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_login :½áÊø[$($g_FmtTimes)]"    ; 
-  elif [ 1 -eq $KEY_FLAG	 ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_copy_id :¿ªÊ¼Ö´ĞĞ[$($g_FmtTimes)]"	 ; ssh_copy_id   ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_copy_id   :½áÊø[$($g_FmtTimes)]"	 ;  #| grep -vE "$destkey|.assword"
-  elif [ 1 -eq $CMD_FLAG	 ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_cmd   :¿ªÊ¼Ö´ĞĞ[$($g_FmtTimes)]"	 ; ssh_cmd   ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_cmd   :½áÊø[$($g_FmtTimes)]"	 ;  #| grep -vE "$destkey|.assword"
-  elif [ 1 -eq $SCP_FLAG 	 ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]scput     :¿ªÊ¼Ö´ĞĞ[$($g_FmtTimes)]"    ; scp_put   ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]scput     :½áÊø[$($g_FmtTimes)]"    ;  #| grep -vE "$destkey|.assword"
-  elif [ 2 -eq $SCP_FLAG	 ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]scpget    :¿ªÊ¼Ö´ĞĞ[$($g_FmtTimes)]"    ; scp_get   ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]scpget    :½áÊø[$($g_FmtTimes)]"    ;  #| grep -vE "$destkey|.assword"
+  if   [ 1 -eq $LOGIN_FLAG   ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_login :å¼€å§‹æ‰§è¡Œ[$($g_FmtTimes)]"    ; ssh_login ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_login :ç»“æŸ[$($g_FmtTimes)]"    ; 
+  elif [ 1 -eq $KEY_FLAG	 ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_copy_id :å¼€å§‹æ‰§è¡Œ[$($g_FmtTimes)]"	 ; ssh_copy_id   ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_copy_id   :ç»“æŸ[$($g_FmtTimes)]"	 ;  #| grep -vE "$destkey|.assword"
+  elif [ 1 -eq $CMD_FLAG	 ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_cmd   :å¼€å§‹æ‰§è¡Œ[$($g_FmtTimes)]"	 ; ssh_cmd   ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_cmd   :ç»“æŸ[$($g_FmtTimes)]"	 ;  #| grep -vE "$destkey|.assword"
+  elif [ 1 -eq $SCP_FLAG 	 ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]scput     :å¼€å§‹æ‰§è¡Œ[$($g_FmtTimes)]"    ; scp_put   ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]scput     :ç»“æŸ[$($g_FmtTimes)]"    ;  #| grep -vE "$destkey|.assword"
+  elif [ 2 -eq $SCP_FLAG	 ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]scpget    :å¼€å§‹æ‰§è¡Œ[$($g_FmtTimes)]"    ; scp_get   ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]scpget    :ç»“æŸ[$($g_FmtTimes)]"    ;  #| grep -vE "$destkey|.assword"
   else
   showLog_warn "${LINENO}" " MAIN_CMD  FILED -[c|l|s] option !!!!"
    showLog_warn "${g_dirBin}/sshpass -p ${PASSWD_STR} ssh -o 'stricthostkeychecking=no' -P ${PORT_STR}  ${USER_STR}@${HOSTS_IP} hostname"
@@ -978,28 +984,28 @@ MAIN_CMD(){
 
 #---------------------------
 #
-#  ²¢·¢²Ù×÷²¿·Ö
+#  å¹¶å‘æ“ä½œéƒ¨åˆ†
 #
 #---------------------------
 proc_fifo()
 {
   if [ -z $THEAD_NUM ];then THEAD_NUM=10;fi
-  #thead_num=500            #×Ô¶¨Òå²¢·¢Êı£¬ÊıÁ¿Ô½Ğ¡Ô½ºÃ
-  tmp_fifo_file="/tmp/$$.fifo" #ÒÔ½ø³ÌºÅIDÃüÃû¹ÜµÀÎÄ¼ş
+  #thead_num=500            #è‡ªå®šä¹‰å¹¶å‘æ•°ï¼Œæ•°é‡è¶Šå°è¶Šå¥½
+  tmp_fifo_file="/tmp/$$.fifo" #ä»¥è¿›ç¨‹å·IDå‘½åç®¡é“æ–‡ä»¶
   showLog_trace "${LINENO}" "$tmp_fifo_file|BEG:[$($g_FmtTimes)]"
-  mkfifo $tmp_fifo_file            #´´½¨ÁÙÊ±¹ÜµÀÎÄ¼ş
-  exec 4<>$tmp_fifo_file           #ÒÔ¶ÁĞ´·½Ê½´ò¿ª¹ÜµÀ,ÎÄ¼şÃèÊö·ûÎª4,Ò²¿ÉÇø3~9ÈÎÒâÃèÊö·û
-  rm -f $tmp_fifo_file             #É¾³ıÁÙÊ±¹ÜµÀÎÄ¼ş,Ò²¿É²»É¾
+  mkfifo $tmp_fifo_file            #åˆ›å»ºä¸´æ—¶ç®¡é“æ–‡ä»¶
+  exec 4<>$tmp_fifo_file           #ä»¥è¯»å†™æ–¹å¼æ‰“å¼€ç®¡é“,æ–‡ä»¶æè¿°ç¬¦ä¸º4,ä¹Ÿå¯åŒº3~9ä»»æ„æè¿°ç¬¦
+  rm -f $tmp_fifo_file             #åˆ é™¤ä¸´æ—¶ç®¡é“æ–‡ä»¶,ä¹Ÿå¯ä¸åˆ 
  
   if [ ${#IPUserPasslist[@]} -lt $THEAD_NUM ];then THEAD_NUM=${#IPUserPasslist[@]};fi
-  showLog_debug "${LINENO}" "²¢·¢Êı[$THEAD_NUM]" 
-  for((i=0;i<$THEAD_NUM;i++))  #ÀûÓÃforÑ­»·Ïò¹ÜµÀÖĞÊäÈë²¢·¢ÊıÁ¿µÄ¿ÕĞĞ
+  showLog_debug "${LINENO}" "å¹¶å‘æ•°[$THEAD_NUM]" 
+  for((i=0;i<$THEAD_NUM;i++))  #åˆ©ç”¨forå¾ªç¯å‘ç®¡é“ä¸­è¾“å…¥å¹¶å‘æ•°é‡çš„ç©ºè¡Œ
   do
       echo 
-  done >&4  #Êä³öÖØ¶¨Ïòµ½¶¨ÒåµÄÎÄ¼şÃèÊöÉÏ
+  done >&4  #è¾“å‡ºé‡å®šå‘åˆ°å®šä¹‰çš„æ–‡ä»¶æè¿°ä¸Š
   
   begintmie=`date +%G/%m/%d:%H:%M:%S`
-  #¶ÁÅäÖÃÎÄ¼ş²¢¹ıÂËµô×¢ÊÍĞĞ
+  #è¯»é…ç½®æ–‡ä»¶å¹¶è¿‡æ»¤æ‰æ³¨é‡Šè¡Œ
 
   for((i=0;i<${#IPUserPasslist[@]};i++))
   do
@@ -1020,11 +1026,11 @@ proc_fifo()
   }  2>&1 &  #>/dev/null
   done
     
-  showLog_info "${LINENO}"  "[µÈ´ıËùÓĞºóÌ¨Ö´ĞĞÍê³É]"
-  wait #µÈ´ıËùÓĞºóÌ¨Ö´ĞĞÍê³É
-  showLog_info "${LINENO}"  "[É¾³ıÎÄ¼şÃèÊö·û]"
-  exec 4<&- #¹Ø±ÕÊäÈë
-  exec 4>&- #É¾³ıÎÄ¼şÃèÊö·û
+  showLog_info "${LINENO}"  "[ç­‰å¾…æ‰€æœ‰åå°æ‰§è¡Œå®Œæˆ]"
+  wait #ç­‰å¾…æ‰€æœ‰åå°æ‰§è¡Œå®Œæˆ
+  showLog_info "${LINENO}"  "[åˆ é™¤æ–‡ä»¶æè¿°ç¬¦]"
+  exec 4<&- #å…³é—­è¾“å…¥
+  exec 4>&- #åˆ é™¤æ–‡ä»¶æè¿°ç¬¦
   showLog_info "${LINENO}"  "$tmp_fifo_file|END:[$($g_FmtTimes)]"
   
 }
@@ -1032,7 +1038,7 @@ proc_fifo()
 
 #---------------------------
 #
-#  ±éÀúÈÕÖ¾
+#  éå†æ—¥å¿—
 #
 #---------------------------
 
@@ -1047,7 +1053,7 @@ log_end()
        tmpLogFile="$g_dirSlog/$($g_FmtDates)-${g_FileName}-${USER_STR}@${HOSTS_IP}.log"
 	   WcNum="$(wc -l $tmpLogFile|awk '{printf $1}')"
 	   
-	   echo -e "\n\n\n--->ÈÕÖ¾:wc=[$WcNum]| cat   $tmpLogFile"
+	   echo -e "\n\n\n--->æ—¥å¿—:wc=[$WcNum]| cat   $tmpLogFile"
 	  # if [ 3 -ge $WcNum ];then  
 		cat  $tmpLogFile
 	  # fi
@@ -1057,7 +1063,7 @@ log_end()
 	find $g_dirSlog -type f -size +10M -print0 | grep -v "bash" | xargs rm -f 2>&1 & 
 	
 	echo -e "\n\t\t\e[31m-------------------<END>----------------------\e[0m\n"
-	showLog_diss "${LINENO}" "i=[$i]|SUM:[${#IPUserPasslist[@]}]´¦ÀíÍê³É" 
+	showLog_diss "${LINENO}" "i=[$i]|SUM:[${#IPUserPasslist[@]}]å¤„ç†å®Œæˆ" 
 }
 
 psh_cmd()
@@ -1088,7 +1094,7 @@ psh_cmd()
 
 ################################################
 # Function: main
-# Description: Ö÷º¯Êı
+# Description: ä¸»å‡½æ•°
 # Parameter:
 #     input:
 #     N/A
@@ -1101,7 +1107,7 @@ psh_cmd()
 main()
 {
 	
-	echo "${LINENO}" "----------¿ªÊ¼³õÊ¼»¯--------"
+	echo "${LINENO}" "----------å¼€å§‹åˆå§‹åŒ–--------"
 	init_all "$@"
 	#getHostNmaeIpUserPass
     psh_cmd
@@ -1110,8 +1116,8 @@ main()
 }
 
 main "$@"
-wait #µÈ´ıËùÓĞºóÌ¨Ö´ĞĞÍê³É
+wait #ç­‰å¾…æ‰€æœ‰åå°æ‰§è¡Œå®Œæˆ
 ret=$?
-#ÔÚ²Ù×÷ÏµÍ³ÈÕÖ¾ÖĞ¼ÇÂ¼Éó¼ÆÈÕÖ¾
+#åœ¨æ“ä½œç³»ç»Ÿæ—¥å¿—ä¸­è®°å½•å®¡è®¡æ—¥å¿—
 #syslog "manager" "test.sh" "$ret" "User root do some test ${LINENO}"
 exit $ret
