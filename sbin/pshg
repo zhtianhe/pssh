@@ -2,8 +2,8 @@
 #*TMOUT=60
 #############################################################################
 ## Copyright:
-## Filename: psh-YQ
-## Description:  自动化运维工具-Psh
+## Filename: pshg
+## Description:  自动化运维工具-Pshg
 ## Version: v1.1
 ## Created: 
 ## set enc fenc tenc
