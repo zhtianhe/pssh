@@ -1,0 +1,1111 @@
+#!/bin/bash
+#*TMOUT=60
+#############################################################################
+## Copyright:
+## Filename: psh-YQ
+## Description:  自动化运维工具-Psh
+## Version: v1.1
+## Created: 
+## set enc fenc tenc
+##  encoding=cp936
+##  fileencoding=gb18030
+##  termencoding=gb18030
+############################################################################
+
+###########声明环境变量##########################
+declare g_OIFS="$IFS"                                 #分隔符
+declare g_OIFSn=$(printf "\n")
+declare g_SrcDir="$(pwd)"                             #当前执行目录
+declare g_PathFileName="$(readlink -f $0)"            #当前命令执行脚本全路径及目录
+declare g_FileName="$(basename ${g_PathFileName})"    #当前脚本文件名不含路径
+declare g_curPath="$(dirname ${g_PathFileName})"      #当前脚本位置目录
+declare g_RootPath="$(dirname ${g_curPath})"          #当前脚本r根目录
+declare g_ConfPath="$g_RootPath/scfg"                 #当前脚本cfg目录
+declare g_BinPath="$g_RootPath/bin"                   #当前脚本bin目录
+declare g_SbinPath="$g_RootPath/sbin"                 #当前脚本bin目录
+export  PATH=${g_BinPath}:$g_SbinPath:$PATH           #声明环境变量
+declare g_ConfFile="${g_FileName%%.*}.conf"           #当前脚本配置文件
+
+declare g_logPath=""                                  #日志路径
+declare g_logFile=""                                  #日志文件名称
+declare g_logLevel=4                                  #当前脚本日志级别: debug:1; info:2; warn:3; error:4  ;#all:0 diss=8
+declare g_ScriptName='pshg'                           #脚本内部文件名
+declare g_srciptVersion='1.0.0.1'                     #脚本版本号
+#数据格式
+g_FmtTimes="date -d today +%Y-%m-%d-%H:%M:%S"  #srcdir="`pwd`"
+g_FmtDates="date -d today +%Y%m%d"               #Path filename
+
+##Version
+
+g_ScriptBase64="$_dircfg/$g_ScriptName-Base64"
+
+#_dirinstall="$HOME/$__ScriptName"
+
+
+################################################
+# Function: init_path
+# Description: 初始化脚本所在目录
+# Parameter:
+#     input:
+#     N/A
+#     output:
+#     N/A
+# Return: 0 -- success; not 0 -- failure
+# Others: N/A
+#################################################
+
+init_path()
+{
+	#path
+	#echo  "${LINENO}" "init_path"
+	if [ "$(dirname ${BASH_SOURCE-$0})" = "."  ];then	
+		cd  "$(dirname  ${g_PathFileName})" 
+		g_curPath="${PWD}"
+		g_scriptName="$(basename "${g_PathFileName}")"
+		g_setup_tool_package_home="$(dirname "${g_curPath}")"
+	else
+		cd "$(dirname "${BASH_SOURCE-$0}")"
+		g_curPath="${PWD}"
+		g_scriptName="$(basename "${BASH_SOURCE-$0}")"
+		g_setup_tool_package_home="$(dirname "${g_curPath}")"
+	fi
+	g_dirinstall=""    
+	
+	g_dir="${g_setup_tool_package_home}"
+	g_dirBin="${g_dir}/bin"
+	g_dirSlog="$HOME/slog"               ;[ -d "${g_dirSlog}" ] || mkdir -m 777 -p "${g_dirSlog}"      #slog   path
+	g_logPath="${g_dirSlog}"                ;[ -d "${g_logPath}" ] || mkdir -m 777 -p "${g_logPath}"      #日志目录 
+	g_dirScfg="${g_dir}/scfg"               ;[ -d "${g_dirScfg}" ] || mkdir -m 500 -p "${g_dirScfg}"      #config path
+	g_dirSlib="${g_dir}/slib"               ;[ -d "${g_dirSlib}" ] || mkdir -m 555 -p "${g_dirSlib}"      #func   path
+	g_dirSbin="${g_dir}/sbin"               ;[ -d "${g_dirSbin}" ] || mkdir -m 555 -p "${g_dirSbin}"      #sibn   path
+	#g_dirDat="${g_dir}/file/dat"            ;[ -d "${g_dirDat}"  ] || mkdir -m 755 -p "${g_dirDat}"       #data   path
+	#g_dirDatE="${g_dirDat}/$(${g_FmtDates})";[ -d "${g_dirDatE}" ] || mkdir -m 755 -p "${g_dirDatE}"      #data+date path
+
+        g_ScriptConf=                                               #脚本配置文件
+	g_ScriptHosts="${g_dirScfg}/pshg-hosts.conf"                  #主机配置文件信息	
+	g_ScriptBase64="$g_dirScfg/pshg-Base64"
+	g_ScriptGroup="${g_dirScfg}/pshg-UserGroup"      #组配置文件
+	#g_ScriptTables="${g_dirScfg}/${g_ScriptName}-tables.conf"  #迁移的表清单
+	g_logFile="$($g_FmtDates)-${g_scriptName}.log"                             #日志文件名
+        TimeOut=60;                                                 #超时时间默认60
+	#s=' '
+	keys="$(sed -ne "/\<base64_key/{s#base64_key.*=##g;p}" $g_ScriptGroup)"          #获取key
+	#keys=$s
+        return 0;
+	cd - >/dev/null
+}
+
+
+################################################
+# Function: init_log
+# Description: 初始化preset日志文件
+# Parameter:
+#     input:
+#     N/A
+#     output:
+#     N/A
+# Return: 0 -- success; not 0 -- failure
+# Others: N/A
+#################################################
+
+init_log()
+{
+	[ -d ${g_logPath} ] || mkdir -m 755 -p ${g_logPath}
+	[ -d ${g_dirDatE} ] || mkdir -m 755 -p ${g_dirDatE}
+	[ -f ${g_logPath}/${g_logFile} ] || touch  "${g_logPath}/${g_logFile}"
+	chmod 700 "${g_logPath}/${g_logFile}"
+    #--------------------------------------#
+	#    导入日志头文件                    #
+	#--------------------------------------#
+	#echo "${LINENO};${g_dirSlib},导入头文件"
+	.  "${g_dirSlib}/log.sh" || { echo "[${g_scriptName}:${LINENO}] ERROR:Failed to load ${g_curPath}/log.sh.:";exit 1;}
+	showLog_hide  "${LINENO}" "g_logPath[$g_logPath]|g_logFile=[$g_logFile]|g_logLevel=${g_logLevel}|当前脚本日志级别: debug:1; info:2; warn:3; error:4  ;#all:0 diss=8"
+	#source ${_dirslib}/mydebug debug
+}
+#---------日志部分结束--------------------------------------------------
+
+
+#-----------------------------------------
+#
+# 制作证书
+#
+#----------------------------------------
+creat_base64()
+{
+ cd $g_SrcDir;
+  if [ ! -f $g_ScriptHosts ];then
+	 read -t 60 -p "配置文件[$g_ScriptHosts]不存在请在60s内输入:" g_ScriptHosts 
+  fi
+  
+  echo 输入信息为:[$g_ScriptHosts]
+
+  if [ -f $g_ScriptHosts ] && [ ! -z $g_ScriptHosts ];then  
+       showLog_diss "${LINENO}" "$(openssl aes-128-cbc -k $keys -base64 -in $g_ScriptHosts >$g_ScriptBase64)"
+	   
+  else
+        echo "输入配置文件[$g_ScriptHosts]不存在";
+	exit ;
+  fi   
+cd -;  
+}
+
+
+
+
+
+###############################################
+# Function: list_hosts_argv
+# Description: list hostid
+# Parameter:
+#     input:
+#     N/A
+#     output:
+#     N/A
+# Return: 0 -- success; not 0 -- failure
+# Others: N/A
+#################################################
+
+list_hosts_argv()
+{
+	
+    for Line in $(openssl aes-128-cbc -k $keys -base64 -d -in $g_ScriptBase64|sed "s/[ \t]//g" ) 
+    do
+		IpStr=$(echo $Line|awk -F',' '{printf $1}'|sed -n '/[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/{s/[ \t]//g;p}' 2>/dev/null|egrep -v '^#')
+        if [ ! -z "$IpStr" ];then
+	        showLog_diss "${LINENO}" "IP:hosts=[$(echo $Line|awk -F'|' '{printf("%-20s\t|%-20s\t",$3,$1)}')]"
+        fi
+	done 
+	exit 0;
+}
+
+list_group_argv()
+{
+  showLog_diss "${LINENO}" " file: $g_ScriptGroup"
+  showLog_diss "${LINENO}" " file: 组选项如下:"
+  sed -n '/^\[.*\]/{/END\|CONF\|all/!p}'  $g_ScriptGroup
+  
+  vi  $g_ScriptGroup
+}
+
+
+
+
+###############################################
+# Function: Usage
+# Description: 帮助描述信息
+# Parameter:
+#     input:
+#     N/A
+#     output:
+#     N/A
+# Return: 0 -- success; not 0 -- failure
+# Others: N/A
+#################################################
+function Usage(){
+clear; 
+#echo -e "\e[33;47m\n"
+
+
+cat << EOT
+    |-----------------------------------------------------------------------------------------------------
+    |                             帮助信息
+    |   名称    ：  $g_ScriptName
+    |   类型    ：  Bash (主动推送)|zh_CN.UTF-8
+    |   应用环境:   LINUX 
+    |   依赖命令：  ssh|scp|expect|openssl
+    |   功能描述：  集群批量管理操作工具;
+    |   三大功能:   1、ssh 登录 
+    |               2、ssh 批量远程命令 
+    |               3、scp 批量文件上传下载
+    |         优点:通过配置 初始秘钥文件,和组操作文件制作出CA文件,
+    |              #安装简单：$__ScriptName --install
+    |         缺点:配置初始秘钥文件,和组操作文件,脚本不能加密
+    |              若要用ssh互信不用加 -w 选项
+    |              不支持批量下载同名文件操作(后续开发)
+    |              类似软件: pssh | clushtershell | Ansible  
+    |-----------------------------------------------------------------------------------------------------
+    | 
+    | Usage : $g_ScriptName [OPTION] ....
+    | 
+    | Options:
+    |     --help              帮助信息
+    |    *-g, --group         组选项  | 组名称标签；组配置文件[]
+    |    *-h, --hosts         主机名称| all:所有主机|主机配置文件[]	
+    |    *-H, --hosts         主机清单| 	
+    |    *-U, --username      用户名称| 无该选项-`whoami` 或者组标签中用户| all:所有用户   	
+    |    *-l, --login         登录标识| 无参数
+    |    *-c, --cmdsh         执行命令| 命令有空格的加引号:(注意单双引号和转义)                    
+    |    *-s, --scp           文件传输| 发送:put:srcdir,destdir 
+    |                                 | 获取:get:srcdir,destdir
+    |     -w, --passwd        密码选项| 无参数 脚本自动填充yes/no 及口令 （无 -w/W 默认互信） 
+    |     -W, --passwd        密码选项| 无参数 可执行程序实现  -o 'stricthostkeychecking=no'（无 -w/W 默认互信）
+    |     -v, --version       脚本版本                 
+    |     -L, --logleve       日志级别| debug:1; info:2; warn:3; error:4  ;#all:0 diss=8"    
+    |     -p, --port          主机端口| 默:22   
+    |     -t,                 进程数量| 默:10 、1-用于调试 
+    |     -T, --timeout       超时时间| 默:60 、   
+    |    #-a, --all          所有用户| 所有组(暂未实现)
+    |    #-x, --removel      排除主机| 组名| 多个用 逗号,分割(暂未实现)
+    |     -k, --key           制作证书| 
+    |     -K, --key           制作互信|并传输互信文件 
+    |     -E, --key           编辑本脚本|vi $g_PathFileName 
+    |    #-i, --install       安装脚本| 默认安装目录:$HOME/Zssh/bin 
+    |    #--clog              清除日志| 清除 $g_ScriptName 执行的日志
+    | Exit status
+    |      0      if OK
+    |      !=0    if serious problems
+    | 
+    | Example:
+    |     1) login: ssh --port=22 cpns@cpns1
+    | 
+    |       A)使用秘钥文件自动登录
+    |          $g_ScriptName -lwh cpns1 
+    |         $g_ScriptName -lwh cpns1 -p 22  -u cpns 
+    |         $g_ScriptName -lwh 20.200.33.135 -p 22 -U cpns
+    | 
+    |       B)使用 ssh 互信免密码登录
+    |           ssh cpns1
+    |      
+    |     2) cmdsh: ssh --port=22 cpns@cpns1:cmdsh
+    | 
+    |         $g_ScriptName -wh cpns1,cpns2,cpns3 -c "date;hostname" 
+    | 
+    |         $g_ScriptName -wg group1 -c "date;hostname"
+    | 
+    |     3)get file
+    |         $g_ScriptName -wh cpns1,cpns2,cpns3 -s get:~/destdir/file:~/srcdir/ 
+    | 
+    |     
+    |     4)put file
+    |         $g_ScriptName -wh cpns1,cpns2,cpns3 -s put:~/srcdir/file:~/destdir/ 
+    |         
+    |     5)key file
+    |          $__ScriptName  -k
+    |         配置文件[]不存在请在60s内输入:Zssh/bin/.hosts.cfg 
+    |         输入信息为:[Zssh/bin/.hosts.cfg]
+    |         !!!! 证书制作成功 !!!
+    |     
+    |          根据提示输入：文件名称 内容格式如下：
+    |          cat  $__ScripHosts.Example    
+    |         
+    |         6)User_Group file
+    |             cat  $__ScriptConf.Example 
+    |         注意:base64_key为初始秘钥口令串仅在制作证书时有效。
+    |              该口令并不能解密证书。     
+    | 
+    | Report bugs to 123456789@qq.com          
+    |                                                         ZhangTianhe  
+    |                                                         2018年 08月 21日 星期二 08:48:35 CST
+    |______________________________________________________________________________________________
+EOT
+#echo -e "\e[0m\n"	
+	
+}
+#----end of funciton usage------
+
+################################################
+# Function: init_getopt
+# Description: 参数解析
+# Parameter:
+#     input:
+#     N/A
+#     output:
+#     N/A
+# Return: 0 -- success; not 0 -- failure
+# Others: N/A
+#################################################
+init_getopt()
+{
+    showLog_diss "${LINENO}" "------开始初始化输入参数[$@]----------"
+	#----------------------------------------------------------------------------------
+	# 解析参数:
+	# 读取配置：
+	# 读取Host: 解析出 源、目标 数据库参数
+	# 读取tables: 遍历数据
+	 opt_A=''; opt_a=''; opt_A_flag=0;opt_a_flag=0;
+	 opt_B=''; opt_b=''; opt_B_flag=0;opt_b_flag=0;
+	 opt_C=''; opt_c=''; opt_C_flag=0;opt_c_flag=0;
+	 opt_E=''; opt_e=''; opt_E_flag=0;opt_e_flag=0;
+	 opt_D=''; opt_d=''; opt_D_flag=0;opt_d_flag=0;
+	 opt_F=''; opt_f=''; opt_F_flag=0;opt_f_flag=0;
+	 opt_G=''; opt_g=''; opt_G_flag=0;opt_g_flag=0;
+	 opt_H=''; opt_h=''; opt_H_flag=0;opt_h_flag=0;
+	 opt_I=''; opt_i=''; opt_I_flag=0;opt_i_flag=0;
+	 opt_J=''; opt_j=''; opt_J_flag=0;opt_j_flag=0;
+	 opt_K=''; opt_k=''; opt_K_flag=0;opt_k_flag=0;
+	 opt_L=''; opt_l=''; opt_L_flag=0;opt_l_flag=0;  #登录 1-登录
+	 opt_M=''; opt_m=''; opt_M_flag=0;opt_m_flag=0;
+	 opt_N=''; opt_n=''; opt_N_flag=0;opt_n_flag=0;
+	 opt_O=''; opt_o=''; opt_O_flag=0;opt_o_flag=0;
+	 opt_P=''; opt_p=''; opt_P_flag=0;opt_p_flag=0;
+	 opt_R=''; opt_r=''; opt_R_flag=0;opt_r_flag=0;
+	 opt_S=''; opt_s=''; opt_S_flag=0;opt_s_flag=0;
+	 opt_T=''; opt_t=''; opt_T_flag=0;opt_t_flag=0;
+	 opt_U=''; opt_u=''; opt_U_flag=0;opt_u_flag=0;
+	 opt_V=''; opt_v=''; opt_V_flag=0;opt_v_flag=0;
+	 opt_W=''; opt_w=''; opt_W_flag=0;opt_w_flag=0;
+	 opt_X=''; opt_x=''; opt_X_flag=0;opt_x_flag=0;
+	 opt_Y=''; opt_y=''; opt_Y_flag=0;opt_y_flag=0;
+	 opt_Z=''; opt_z=''; opt_Z_flag=0;opt_z_flag=0;
+	
+	#-----------------------------------------
+    PORT_STR="22" #端口名称 	   
+    PASSD_FLAG=0; 
+	
+    #传输
+    OptRsyncFlag=0
+    SCP_STR=0  	     #get:srcdirfile:local_dir 
+    SCP_PUT_GET=""   #get|put
+    SCP_LOC_STR=""   #srcdirfile
+    SCP_DES_STR=""   #desdir
+
+	
+
+    # set option values
+	#getopt -o vVlwW:h:p:u:g:s:a:kc:
+	#OPTANRGV='A:a:B:b:C:c:E:e:D:d:F:f:G:g:H:h:I:i:J:j:K:k:L:l:M:m:N:n:O:o:P:p:R:r:S:s:T:t:U:u:V:v:W:w:X:x:Y:y:Z:z:'
+	OPTANRGV='A:a:B:b:C:c:Ee:D:d:F:f:Gg:Hh:I:i:J:j:KkL:lM:m:N:n:O:o:P:p:R:r:S:s:T:t:U:u:VvwWX:x:Y:y:Z:z:'
+	RET=$(getopt -o ${OPTANRGV} -a -l help,version,login,passwd,hosts:,port:group:,user:,scp:,all,key,install,clog,cmdsh: -n "${g_scriptName}"  -- "$@")
+	if [ $? != 0 ]; then 
+		showLog_error "${LINENO}" " $g_scriptName exited with doing nothing .exit -1" >&2;
+		exit -1;
+	fi
+	eval set -- "$RET"
+	
+	
+	#if [ -z "${opt_c}" ];then showLog_diss "${LINENO}" "Usage -c 'xxx->xxx' "; Usage ;exit -1;fi
+    while true; do
+        case "$1" in
+            --help          ) showLog_diss "${LINENO}" "Usage" ; Usage;break;;   
+            -v|-V|--version	) showLog_diss "${LINENO}" "$(basename $0) : version $g_srciptVersion";break;;
+            -l | --login    ) opt_l_flag=1 ;opt_l=                                  ;shift 1 ;; 
+			-L | --loglevel ) opt_L_flag=1 ;opt_L="$2";    g_logLevel="$2"          ;shift 2 ;;  
+            -a | --all		) opt_a_falg=1                                          ;shift 1 ;;
+            -E | --edit		) opt_E_falg=1 ;vi  $g_PathFileName                     ;shift 1 ;;
+            -c | --cmdsh	) opt_c_flag=1 ;opt_c="$2"                              ;shift 2 ;;
+            -g | --group	) opt_g_flag=1 ;opt_g="$2"                              ;shift 2 ;;
+			-G | --group	) list_group_argv                                       ;shift 1 ;;
+            -h | --hosts	) opt_h_flag=1 ;opt_h="$2"                              ;shift 2 ;;
+			-H | --hosts	) list_hosts_argv                                       ;shift 1 ;;
+            -U | --user		) opt_U_flag=1 ;opt_U="$2"                              ;shift 2 ;;
+            -w 			    ) opt_w_flag=1 ;             PASSD_FLAG=1		        ;shift 1 ;;
+            -p | --port		) opt_p_flag=1 ;opt_p="$2";  PORT_STR="$2"	        	;shift 2 ;;
+			-t | --porc		) opt_t_flag=1 ;opt_t="$2";  THEAD_NUM="$2"	        	;shift 2 ;; 
+            -W | --sshpss	) opt_W_flag=1 ;PASSD_FLAG=2 	                        ;shift 1 ;;
+                             #case "$2" in
+                             #    "") showLog_diss "${LINENO}"  "passwd is null ";;
+                             #    * ) opt_W="$2";showLog_info "PASSWD_STR[$opt_W]";;
+                             #esac 
+                             #shift 2 ;;
+            -S | --rsync	) #echo "1[$1] 2[$2] 3[$3] 4[$4] 5[$5] 6[$6] 7[$7]"
+			              opt_S_flag=1
+	    	              opt_s="$2"
+                              SCP_STR="$2";
+                              SCP_PUT_GET=${SCP_STR%%:*};
+                              SCP_STR="${SCP_STR#*:}"
+                              case "$SCP_PUT_GET" in
+                                  PUT|put|p|P)
+                                      SCP_LOC_STR="${SCP_STR%%:*}"
+                                      SCP_DES_STR="${SCP_STR##*:}"
+                                      SCP_STR=1;
+	    		              opt_s_flag=1;
+                                  ;;
+                                  GET|get|g|G)
+                                      SCP_LOC_STR="${SCP_STR##*:}"
+                                      SCP_DES_STR="${SCP_STR%%:*}"
+                                      SCP_STR=2;
+	    		              opt_s_flag=2;
+                                  ;;
+                              esac
+	    	                  shift 2 ;;
+            -s | --scp		) #echo "1[$1] 2[$2] 3[$3] 4[$4] 5[$5] 6[$6] 7[$7]"
+                              opt_S_flag=0;
+	    	              opt_s="$2"
+                              SCP_STR="$2";
+                              SCP_PUT_GET=${SCP_STR%%:*};
+                              SCP_STR="${SCP_STR#*:}"
+                              case "$SCP_PUT_GET" in
+                                  PUT|put|p|P)
+                                      SCP_LOC_STR="${SCP_STR%%:*}"
+                                      SCP_DES_STR="${SCP_STR##*:}"
+                                      SCP_STR=1;
+	    		              opt_s_flag=1;
+                                  ;;
+                                  GET|get|g|G)
+                                      SCP_LOC_STR="${SCP_STR##*:}"
+                                      SCP_DES_STR="${SCP_STR%%:*}"
+                                      SCP_STR=2;
+	    		              opt_s_flag=2;
+                                  ;;
+                              esac
+	    	                  shift 2 ;;
+
+            -k | --key 		) showLog_diss "${LINENO}" "!!!! $g_ScriptBase64 !!!";
+			                  rm -f $g_ScriptBase64;
+			                  creat_base64 ;
+							  showLog_diss "${LINENO}" "!!!! 证书制作成功 !!!";exit;;		
+            -K | --ssh-key  ) showLog_diss "${LINENO}" "!!!! 制作传输互信 !!!";
+			                  ssh_key;
+			                  opt_K_flag=1;
+                              shift 1 ;;
+            --install		) install_zsh ;showLog_diss "${LINENO}" "!!!安装完成!!!";exit;;
+            --clog			) echo "file_num[`ls $_dirlog | wc -l`]|[`du -sh $_dirlog`]"
+                              find $_dirlog/* -cmin +0 |grep -v "bash"| xargs rm -f  #>/dev/null 2>&1 &
+                              showLog_diss "${LINENO}" "file_num[`ls $_dirlog | wc -l`]|[`du -sh $_dirlog`]"
+                              exit;;
+            -- ) shift;break;;
+            *  ) showLog_error "${LINENO}" "internal error!";exit;;
+        esac
+    #echo "1[$1] 2[$2] 3[$3] 4[$4] 5[$5] 6[$6] 7[$7]"
+    done
+    OptRsyncFlag=$opt_S_flag
+	return 0;
+}
+
+ssh_key(){
+   if [ ! -d $HOME/.ssh/id_rsa.pub ];then
+       showLog_info "${LINENO}" ssh-keygen -t rsa -C "$LONGNAME@$(hostname)"
+       #ssh-keygen -t rsa -C ""
+   fi
+}
+
+
+#----------------------------------
+#
+# 参数检查
+#
+#----------------------------------
+
+check_argv()
+{
+  if   [ 0 -eq $opt_l_flag ] && [ 0 -eq $opt_c_flag ] && [ 0 -eq $opt_s_flag ] && [ 0 -eq $opt_K_flag ];then
+       showLog_error "${LINENO}" " $g_ScriptName 缺少[  -l | -c | -s | -K ] 参数"
+	   exit -1;
+  fi
+  
+  if  [ 0 -eq $opt_g_flag ] && [ 0 -eq $opt_h_flag ];then
+       showLog_error "${LINENO}" " $g_ScriptName 缺少[  -g | -h  ] 参数"
+	   exit -1;
+  fi
+  
+  if   [ 1 -eq $opt_h_flag ]  && [ 0 -eq $opt_U_flag ];then
+       showLog_error "${LINENO}" " $g_ScriptName  -h 时  缺少[  -U  ] 参数"
+	   exit -1;
+  fi
+  
+  if  [ 1 -eq $opt_s_flag ];then
+     if [ -z "$SCP_LOC_STR" ] || [ -z "$SCP_DES_STR" ];then 
+         showLog_error "${LINENO}" "SCP_LOC_STR=[${SCP_LOC_STR}] or SCP_DES_STR=[$SCP_DES_STR] is null "
+         exit -1;
+     fi
+    
+     if [ ! -e "$SCP_LOC_STR" ];then
+         showLog_error "${LINENO}" "SCP_LOC_STR=[${SCP_LOC_STR}] 不存在"
+        exit -1
+     fi
+  fi
+# exit -1 
+}
+
+
+################################################
+# Function: init_hosts_argv
+# Description: 参数二次解析-组解析
+# Parameter:
+#     input:
+#     N/A
+#     output: HOST_STRS_ARGV 主机名称列表
+#     N/A
+# Return: 0 -- success; not 0 -- failure
+# Others: N/A
+#################################################
+#-g
+init_hosts_argv(){
+     showLog_info "${LINENO}" "解析组配置文件"
+	 #获取定位符号
+	 GROUP_CONF=${g_ScriptGroup} ; #组配置文件
+	 GROUP_FlagName=($opt_g); #组标签名"group1,greup2"
+	 GROUP_UserName=${opt_U}; #组用户名
+	 GROUP_HostList=        ; #组主机清单
+	 IPUserPasslist=        ; #即将处理的清单列表"IP0:U:P,IP1:U:P"
+	 HOSTS_CONF=${g_ScriptHosts} ; #主机配置文件
+
+	 GROUPs_BEGIN_NUM=0   #组开始行号
+	 GROUPs_END_NUM=0     #组结束行号
+	 #如果有组参数则解析
+   
+	if [ 1 -eq $opt_g_flag ];then  
+	    opt_g_flag=0  #重置为零
+        showLog_debug "${LINENO}" "opt_g_flag=${opt_g_flag} 组参数则解析";
+		
+		GROUPs_BEGIN_NUM=`sed -n "/^\[\<${GROUP_FlagName}\>\]/{=}"	$GROUP_CONF`  #获取组开始位置行号
+		GROUPs_EOF_NUM=`sed -n '${=}'	$GROUP_CONF`  #最后一行行号
+	    if [ -z "$GROUPs_BEGIN_NUM" ];then 
+		   showLog_error "${LINENO}" "GROUPs_BEGIN_NUM is [${GROUPs_BEGIN_NUM}]| -g [$opt_g] 组标签没有找到 [$GROUP_CONF]"  
+		   exit -1
+		fi
+		
+        showLog_diss "${LINENO}" "GROUPs_BEGIN_NUM is [${GROUPs_BEGIN_NUM}]-->[$GROUPs_EOF_NUM]!!!"		
+		for ((i=$GROUPs_BEGIN_NUM;i<=$GROUPs_EOF_NUM;i++))
+		do
+	       tmpStr="$(sed -n "${i}p"   $GROUP_CONF )" 		   
+		   showLog_hide "${LINENO}" "i=[${i}]|${GROUPs_BEGIN_NUM},${GROUPs_END_NUM}|$tmpStr"
+		   case $tmpStr in
+		        *"[END]"*    ) 
+				GROUPs_END_NUM=${i};
+				showLog_hide "${LINENO}" "3===>[END]GROUPs_END_NUM=>$GROUPs_END_NUM<"
+			break;;
+			*[Uu][Ss][Ee][Rr][Nn][Aa][Mm][Ee]* )
+					GROUP_UserName="$(echo $tmpStr|cut -d"=" -f2 )"
+					showLog_hide "${LINENO}" "1===>GROUP_UserName=$GROUP_UserName"
+			 ;;
+			*[Hh][Oo][Ss][Tt][Ll][Ii][Ss][Tt]* )
+				    GROUP_HostList="${GROUP_HostList}|$(echo $tmpStr|cut -d"=" -f2 )"
+				    GROUP_HostList="$(echo "${GROUP_HostList}"|sed -e 's/^|//g' -e 's/|$//g'  )"
+					showLog_hide "${LINENO}" "2===>GROUP_HostList=>$GROUP_HostList<"
+					opt_g_flag=1  #有参数时为1
+			;;
+			*)
+				showLog_debug "${LINENO}" "4===>continue tmpStr=>$tmpStr<"
+				continue
+			;;                				
+		   esac 
+		done
+	fi
+	showLog_debug "${LINENO}" "0==>i=[${i}]|${GROUPs_BEGIN_NUM},${GROUPs_END_NUM}|-U $GROUP_UserName|GROUP_HostList=>${GROUP_HostList}<"
+	
+	OptHost="$opt_h" #主机名唯一
+    OptUser="$opt_U" #确定用户
+    #如果有主机-h  参数则解析
+ 
+   #没有用户参数时使用配置文件中的参数
+	if [ 0 -eq ${opt_U_flag} ];then 
+	       OptUser="$GROUP_UserName"  ;
+          if [ -z $OptUser ];then
+            showLog_error "${LINENO}" " $g_ScriptName  -g  时 没找到用户需要 [  -U  ] 参数"
+            exit -1;
+          fi
+	fi  #确定用户	
+		
+   if [ 1 -eq ${opt_h_flag} ];then
+		OptHost="$opt_h" #主机名唯一 
+		if [ "all" == "${OptHost}" ];then
+		  
+          GROUP_HostList="$(echo "${GROUP_HostList}|.*"|sed -e 's/^|//g' -e 's/|$//g'  )"
+		  showLog_debug "${LINENO}" "获取hosts=${OptHost}[egrep -i \"\\<${GROUP_HostList}\\>\"  $HOSTS_CONF]";
+		else
+		
+          GROUP_HostList="$(echo "${GROUP_HostList}|${OptHost}"|sed -e 's/^|//g' -e 's/|$//g'  )"
+		  showLog_debug "${LINENO}" "获取hosts=${GROUP_UserName}@${OptHost}[egrep -i \"\\<${GROUP_HostList}\\>\"  $HOSTS_CONF]";
+		fi   
+    else
+	    if [ 0 -eq $opt_g_flag ];then
+	        showLog_warn "${LINENO}" " 参数 -g [$opt_g] 组标签没有找到[$GROUP_CONF]  "
+		    exit -1;
+        fi	
+	fi
+    
+     showLog_info "${LINENO}" "获取GROUP_UserName=${GROUP_UserName}|OptHost=${OptHost}[egrep -i \"\\<${GROUP_HostList}\\>\"  $HOSTS_CONF]";
+     showLog_trace "${LINENO}" "openssl aes-128-cbc -k $keys -base64 -d -in $g_ScriptBase64 |egrep -i \"\<${GROUP_HostList}\>\" "
+    {
+	 
+        #for Line in $(egrep -i "\<${GROUP_HostList}\>"  $HOSTS_CONF) 
+		#for Line in $(openssl aes-128-cbc -k $keys -base64 -d -in $g_ScriptBase64 |egrep -i "\<${GROUP_HostList}\>" ) 
+		for Line in $(openssl aes-128-cbc -k $keys -base64 -d -in $g_ScriptBase64 |sed "s/[ \t]//g"|egrep -i "\<${GROUP_HostList}\>" ) 
+        do
+            showLog_all "${LINENO}" "Line=[$Line]"
+            IpStr=$(echo $Line|awk -F',' '{printf $1}'|sed -n '/[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/{s/[ \t]//g;p}' 2>/dev/null|egrep -v '^#')
+            showLog_all "${LINENO}" "IP:hosts=[$(echo $Line|awk -F',' '{printf $1":"$2}')]"
+            
+			if [ ! -z $IpStr ]; then  
+                HostName=$(echo $Line|awk -F',' '{printf $2}')
+				if [ 0 -eq $opt_h_flag ];then  
+				    OptHost="$HostName"
+				else 
+				    OptHost="$opt_h"
+				fi
+				showLog_all "${LINENO}" "获取GROUP_UserName=${GROUP_UserName}|OptHost=${OptHost}|${HostName}";
+				case $OptHost in
+				    "${HostName}" | "all" )
+					   {
+                        UserKey=$(echo $Line|awk -F"[|]" '{printf $4}'|sed 's/,/\t/g') 
+                        if [ ! -z "$UserKey" ] ;then    
+                            for UKey in $UserKey ;do 
+                            UserName=${UKey%%/*}
+                            UserKey=${UKey#*/}
+                            #showLog_trace "${LINENO}" "===>Line:IpStr=$IpStr  -U $UserName -h $HostName  -k $UserKey"   
+                            #此处设置用户名过滤:
+				        	
+				        	case  $OptUser in
+				        	  "${UserName}" | "all" )showLog_debug "${LINENO}" "$HostName $IpStr  $UserName OK"
+							     IPUserPasslist=("$(echo "$IPUserPasslist,$HostName:$IpStr:$UserName:$UserKey "|sed -e 's/^,//g' -e 's/,$//g' )")
+							    ;;
+                              *                     )  continue;;					  
+				        	esac
+                            
+				        	#根据不通的参数调用不同的函数
+                        done
+                        fi
+					  };;
+				   *  ) showLog_debug "${LINENO}" "主机名[$OptHost != $HostName]不存在请参考：${g_ScriptHosts}"  ;continue;;
+				esac
+            fi
+        done 
+        
+		
+        showLog_trace "${LINENO}" "openssl aes-128-cbc -k $keys -base64 -d -in $g_ScriptBase64 |egrep -i \"\<${GROUP_HostList}\>\" "
+        IFS=','
+		IPUserPasslist=($IPUserPasslist)
+		IFS="${g_OIFS}"
+		showLog_debug  "${LINENO}" "IPUserPasslist[${#IPUserPasslist[@]}]=[\${IPUserPasslist[@]}]" 
+    }
+	if [ 0 -eq  ${#IPUserPasslist[@]} ];then 
+	    showLog_warn  "${LINENO}" "获取到要处理的清单为空：IPUserPasslist is [${#IPUserPasslist[@]}]" 
+		exit -1;
+	fi
+	showLog_diss "${LINENO}" "SUM:[${#IPUserPasslist[@]}]=[\${IPUserPasslist[@]}]" 
+    return ${#IPUserPasslist[@]};
+}
+
+
+
+
+init_printf(){
+
+showLog_all "${LINENO}" "调试公共变量--------------$keys-----------"
+showLog_all "${LINENO}" "g_OIFS                                     #分隔符"
+showLog_all "${LINENO}" "g_SrcDir       =${g_SrcDir}                #当前执行目录"
+showLog_all "${LINENO}" "g_PathFileName =${g_PathFileName}          #当前命令执行脚本全路径及目录"
+showLog_all "${LINENO}" "g_FileName     =${g_FileName}              #当前脚本文件名"
+showLog_all "${LINENO}" "g_curPath      =${g_curPath}               #当前脚本所在目录"
+showLog_all "${LINENO}" "g_logPath      =${g_logPath}               #日志路径"
+showLog_all "${LINENO}" "g_logFile      =${g_logFile}               #日志文件名称"
+showLog_all "${LINENO}" "g_logLevel=${g_logLevel}                   #当前脚本日志级别: debug:1; info:2; warn:3; error:4  ;#all:0 diss=8"
+showLog_all "${LINENO}" "g_ScriptName=${g_ScriptName}               #脚本内部文件名"
+showLog_all "${LINENO}" "g_srciptVersion=${g_srciptVersion}         #脚本版本号"
+showLog_all "${LINENO}" "g_curPath=${g_curPath}"
+showLog_all "${LINENO}" "g_scriptName=${g_scriptName}"
+showLog_all "${LINENO}" "g_setup_tool_package_home=${g_setup_tool_package_home}"
+showLog_all "${LINENO}" "g_dir    =${g_dir}";
+showLog_all "${LINENO}" "g_dirSlog=${g_dirSlog}";
+showLog_all "${LINENO}" "g_logPath=${g_logPath}";
+showLog_all "${LINENO}" "g_dirScfg=${g_dirScfg}";
+showLog_all "${LINENO}" "g_dirSlib=${g_dirSlib}";
+showLog_all "${LINENO}" "g_dirSbin=${g_dirSbin}";
+showLog_all "${LINENO}" "g_dirDat= ${g_dirDat} ";
+showLog_all "${LINENO}" "g_dirDatE=${g_dirDatE}";
+showLog_all "${LINENO}" "g_ScriptHosts =${g_ScriptHosts}  #主机配置文件信息"
+showLog_all "${LINENO}" "g_ScriptConf  =${g_ScriptConf}   #用户组配置文件  "
+showLog_all "${LINENO}" "g_ScriptTables=${g_ScriptTables} #迁移的表清单    "
+showLog_all "${LINENO}" "g_logFile     =${g_logFile}      #日志文件名      "
+showLog_all "${LINENO}" "调试输入参数选项-----"
+showLog_all "${LINENO}" "opt_A=${opt_A}; opt_a=${opt_a}; opt_A_flag=${opt_A_flag};opt_a_flag=${opt_a_flag}";
+showLog_all "${LINENO}" "opt_B=${opt_B}; opt_b=${opt_b}; opt_B_flag=${opt_B_flag};opt_b_flag=${opt_b_flag}";
+showLog_all "${LINENO}" "opt_C=${opt_C}; opt_c=${opt_c}; opt_C_flag=${opt_C_flag};opt_c_flag=${opt_c_flag}";
+showLog_all "${LINENO}" "opt_E=${opt_E}; opt_e=${opt_e}; opt_E_flag=${opt_E_flag};opt_e_flag=${opt_e_flag}";
+showLog_all "${LINENO}" "opt_D=${opt_D}; opt_d=${opt_d}; opt_D_flag=${opt_D_flag};opt_d_flag=${opt_d_flag}";
+showLog_all "${LINENO}" "opt_F=${opt_F}; opt_f=${opt_f}; opt_F_flag=${opt_F_flag};opt_f_flag=${opt_f_flag}";
+showLog_all "${LINENO}" "opt_G=${opt_G}; opt_g=${opt_g}; opt_G_flag=${opt_G_flag};opt_g_flag=${opt_g_flag}";
+showLog_all "${LINENO}" "opt_H=${opt_H}; opt_h=${opt_h}; opt_H_flag=${opt_H_flag};opt_h_flag=${opt_h_flag}";
+showLog_all "${LINENO}" "opt_I=${opt_I}; opt_i=${opt_i}; opt_I_flag=${opt_I_flag};opt_i_flag=${opt_i_flag}";
+showLog_all "${LINENO}" "opt_J=${opt_J}; opt_j=${opt_j}; opt_J_flag=${opt_J_flag};opt_j_flag=${opt_j_flag}";
+showLog_all "${LINENO}" "opt_K=${opt_K}; opt_k=${opt_k}; opt_K_flag=${opt_K_flag};opt_k_flag=${opt_k_flag}";
+showLog_all "${LINENO}" "opt_L=${opt_L}; opt_l=${opt_l}; opt_L_flag=${opt_L_flag};opt_l_flag=${opt_l_flag}";
+showLog_all "${LINENO}" "opt_M=${opt_M}; opt_m=${opt_m}; opt_M_flag=${opt_M_flag};opt_m_flag=${opt_m_flag}";
+showLog_all "${LINENO}" "opt_N=${opt_N}; opt_n=${opt_n}; opt_N_flag=${opt_N_flag};opt_n_flag=${opt_n_flag}";
+showLog_all "${LINENO}" "opt_O=${opt_O}; opt_o=${opt_o}; opt_O_flag=${opt_O_flag};opt_o_flag=${opt_o_flag}";
+showLog_all "${LINENO}" "opt_P=${opt_P}; opt_p=${opt_p}; opt_P_flag=${opt_P_flag};opt_p_flag=${opt_p_flag}";
+showLog_all "${LINENO}" "opt_R=${opt_R}; opt_r=${opt_r}; opt_R_flag=${opt_R_flag};opt_r_flag=${opt_r_flag}";
+showLog_all "${LINENO}" "opt_S=${opt_S}; opt_s=${opt_s}; opt_S_flag=${opt_S_flag};opt_s_flag=${opt_s_flag}|$SCP_LOC_STR|$SCP_DES_STR";
+showLog_all "${LINENO}" "opt_T=${opt_T}; opt_t=${opt_t}; opt_T_flag=${opt_T_flag};opt_t_flag=${opt_t_flag}";
+showLog_all "${LINENO}" "opt_U=${opt_U}; opt_u=${opt_u}; opt_U_flag=${opt_U_flag};opt_u_flag=${opt_u_flag}";
+showLog_all "${LINENO}" "opt_V=${opt_V}; opt_v=${opt_v}; opt_V_flag=${opt_V_flag};opt_v_flag=${opt_v_flag}";
+showLog_all "${LINENO}" "opt_W=${opt_W}; opt_w=${opt_w}; opt_W_flag=${opt_W_flag};opt_w_flag=${opt_w_flag}";
+showLog_all "${LINENO}" "opt_X=${opt_X}; opt_x=${opt_x}; opt_X_flag=${opt_X_flag};opt_x_flag=${opt_x_flag}";
+showLog_all "${LINENO}" "opt_Y=${opt_Y}; opt_y=${opt_y}; opt_Y_flag=${opt_Y_flag};opt_y_flag=${opt_y_flag}";
+showLog_all "${LINENO}" "opt_Z=${opt_Z}; opt_z=${opt_z}; opt_Z_flag=${opt_Z_flag};opt_z_flag=${opt_z_flag}";
+}
+
+
+# init_all "$@"
+init_all(){
+
+
+    #--------------------------------------#
+	#   开始运行脚本                       #
+	#--------------------------------------#
+	echo "${LINENO}" "-----开始运行脚本[$g_ScriptName $@]"
+    init_path
+	
+	#echo "${LINENO}" "Set LOG   :$@"
+    init_log
+	
+	if [ $# -eq 0 ];then showLog_diss "${LINENO}" "Usage" ; Usage;exit;fi
+    showLog_info "${LINENO}" "------开始初始化输入参数[$@]----------"
+	init_getopt "$@"
+    check_argv "$@" 
+	showLog_all "${LINENO}" "getopt_printf"
+	init_printf 
+	
+	showLog_info "${LINENO}" "init_hosts_argv 获取连接信息"
+	init_hosts_argv
+}
+
+
+#-----------------------------
+#
+#  登录远程终端
+#
+#------------------------------
+#spawn ssh -o 'stricthostkeychecking=no' -p $PORT_STR  $USER_STR@$HOSTS_IP
+ssh_login(){ 
+	case $PASSD_FLAG in
+	  1 )
+		#if true ;then
+			CMD_PROMPT="\](\$|#|>)"
+			script="export LANG=zh_CN.UTF-8"
+			expect -c "
+				send_user connecting\ to\ $HOSTS_IP...\r 
+				spawn ssh -o ConnectTimeout=5  -p $PORT_STR  $USER_STR@$HOSTS_IP
+				expect {
+				yes/no {send -- yes\r;exp_continue}
+				*asswor* {send -- $PASSWD_STR\r;exp_continue}
+				}
+				interact
+			"
+		;;
+      2 ) ${g_dirBin}/sshpass -p ${PASSWD_STR} ssh -o 'stricthostkeychecking=no' -o ConnectTimeout=5 -p ${PORT_STR}  ${USER_STR}@${HOSTS_IP} ;;
+      * ) ssh -o ConnectTimeout=5 -p $PORT_STR $USER_STR@$HOSTS_IP ;;
+    esac
+}
+
+
+ssh_copy_id(){ 
+    if [ ! -f  $HOME/.ssh/id_rsa.pub ];then showLog_error "${LINENO}" "$HOME/.ssh/id_rsa.pub not find" ;exit -1;fi
+	case $PASSD_FLAG in
+	  1 )
+		#if true ;then
+			CMD_PROMPT="\](\$|#|>)"
+			script="export LANG=zh_CN.UTF-8"
+			expect -c "
+				send_user connecting\ to\ $HOSTS_IP...\r 
+				spawn ssh-copy-id -i  $HOME/.ssh/id_rsa.pub  $USER_STR@$HOSTS_IP
+				expect {
+				yes/no {send -- yes\r;exp_continue}
+				*asswor* {send -- $PASSWD_STR\r;exp_continue}
+				}
+				interact
+			"
+		;;
+      2 ) ${g_dirBin}/sshpass -p ${PASSWD_STR} ssh-copy-id -i $HOME/.ssh/id_rsa.pub  ${USER_STR}@${HOSTS_IP} ;;
+      * ) ssh -o ConnectTimeout=5 -p $PORT_STR $USER_STR@$HOSTS_IP ;;
+    esac
+    ${g_dirBin}/sshpass -p ${PASSWD_STR} ssh -o 'stricthostkeychecking=no' -o ConnectTimeout=5 -p ${PORT_STR}  ${USER_STR}@${HOSTS_IP} "awk '!a[\$0]++' ~/.ssh/authorized_keys >authorized_keys-tmp && mv authorized_keys-tmp  ~/.ssh/authorized_keys;chmod 600 -R  ~/.ssh/* "
+}
+
+
+#-----------------------------
+#
+#  执行远程命令
+#  执行命令超时180s
+#------------------------------
+
+ssh_cmd(){
+ (
+  case $PASSD_FLAG in
+	  1 )
+  expect<<!
+		set timeout $TimeOut
+		spawn ssh  -o ConnectTimeout=5 -p $PORT_STR $USER_STR@$HOSTS_IP ". ~/.*profile >/dev/null 2>&1;hostname;$CMD_STR"
+		expect {
+		"yes/no" {send  "yes\r";exp_continue}
+		"*assword" {send  "$PASSWD_STR\r"}
+		}
+		expect eof
+!
+
+   ;;
+   2 ) #"stricthostkeychecking=no" yes/no
+       #ConnectTimeout=5 连接超时时间
+       #ServerAliveInterval 多少时间从发送一次请求
+       #ServerAliveCountMax 次数;ps -ef|grep '${USER_STR}@notty'|grep sshd|awk '{print $2}'|xargs kill -9 ";;
+       ${g_dirBin}/sshpass -p ${PASSWD_STR} ssh -o "stricthostkeychecking=no" -o ConnectTimeout=5  -p ${PORT_STR}  ${USER_STR}@${HOSTS_IP} ". ~/.*profile>/dev/null 2>&1;hostname;$CMD_STR" ;;
+  * )
+
+	 ssh -o "stricthostkeychecking=no" -o ConnectTimeout=5  -p $PORT_STR  $USER_STR@$HOSTS_IP ". ~/.*profile>/dev/null 2>&1;hostname;$CMD_STR"
+
+   ;;
+   esac
+   )
+ showLog_diss "${LINENO}" "处理完成断开连接"
+}
+
+
+
+
+
+#-----------------------------
+#
+#  下载文件
+#
+#------------------------------
+scp_get(){
+ CMD_STR=${opt_c}
+(
+ case $PASSD_FLAG in
+	  1 )
+
+expect<<!
+ 		set timeout 600
+ 		spawn scp -P $PORT_STR -rp   $USER_STR@$HOSTS_IP:$SCP_DES_STR  $SCP_LOC_STR
+	 	expect {
+	 	"yes/no" {send  "yes\r";exp_continue}
+	 	"*assword" {send  "$PASSWD_STR\r"}
+		eof
+ 		}
+		expect eof
+!
+
+
+
+  ;;
+  2 ) #showLog_debug "${LINENO}" " ${g_dirBin}/sshpass -p ${PASSWD_STR} scp  -o 'stricthostkeychecking=no' -p ${PORT_STR} -rp  ${USER_STR}@${HOSTS_IP}:${SCP_DES_STR}  ${SCP_LOC_STR}"
+       case $OptRsyncFlag in
+	0)${g_dirBin}/sshpass -p ${PASSWD_STR} scp  -o 'stricthostkeychecking=no' -P ${PORT_STR} -rp ${USER_STR}@${HOSTS_IP}:${SCP_DES_STR}  ${SCP_LOC_STR} ;;
+        1)${g_dirBin}/sshpass -p ${PASSWD_STR} rsync -av  $USER_STR@$HOSTS_IP:$SCP_DES_STR  $SCP_LOC_STR;;
+        *)showLog_error "${LINENO}"  "OptRsyncFlag=[$OptRsyncFlag] 0-scp 1-rsync ";;
+       esac
+  ;;
+  * )
+       case $OptRsyncFlag in
+	0)scp  -o 'stricthostkeychecking=no' -P ${PORT_STR} -rp ${USER_STR}@${HOSTS_IP}:${SCP_DES_STR}  ${SCP_LOC_STR} ;;
+        1)rsync -av  $USER_STR@$HOSTS_IP:$SCP_DES_STR  $SCP_LOC_STR;;
+        *)showLog_error "${LINENO}"  "OptRsyncFlag=[$OptRsyncFlag] 0-scp 1-rsync ";;
+       esac
+
+	#scp -P $PORT_STR -rp $USER_STR@$HOSTS_IP:$SCP_DES_STR  $SCP_LOC_STR
+
+  ;;
+  esac 
+)
+
+}
+
+#-----------------------------
+#
+#  上传文件
+#
+#------------------------------
+	
+scp_put(){
+(
+ case $PASSD_FLAG in
+	1)	
+expect<<!
+ 		set timeout 600
+ 		spawn scp -P $PORT_STR -rp $SCP_LOC_STR  $USER_STR@$HOSTS_IP:$SCP_DES_STR 
+	 	expect {
+	 	"yes/no" {send "yes\r";exp_continue}
+	 	"*assword" {send "$PASSWD_STR\r"}
+		eof
+ 		}
+		expect eof
+!
+
+  ;;
+  2 )
+       case $OptRsyncFlag in
+	0)${g_dirBin}/sshpass -p ${PASSWD_STR} scp  -o 'stricthostkeychecking=no' -P ${PORT_STR} -rp ${SCP_LOC_STR} ${USER_STR}@${HOSTS_IP}:${SCP_DES_STR} ;;
+        1)${g_dirBin}/sshpass -p ${PASSWD_STR} rsync -av $SCP_LOC_STR   $USER_STR@$HOSTS_IP:$SCP_DES_STR;;
+        *)showLog_error "${LINENO}"  "OptRsyncFlag=[$OptRsyncFlag] 0-scp 1-rsync ";;
+       esac
+   ;;  
+  * )
+       case $OptRsyncFlag in
+	0)scp  -o 'stricthostkeychecking=no' -P ${PORT_STR} -rp ${SCP_LOC_STR} ${USER_STR}@${HOSTS_IP}:${SCP_DES_STR} ;;
+        1)rsync -av $SCP_LOC_STR   $USER_STR@$HOSTS_IP:$SCP_DES_STR;;
+        *)showLog_error "${LINENO}"  "OptRsyncFlag=[$OptRsyncFlag] 0-scp 1-rsync ";;
+       esac
+
+ ;;
+  esac  
+)
+#)2>&1|egrep -v "\<spawn|expect|assword|stty\>";
+}
+
+
+
+
+
+MAIN_CMD(){
+
+  LOGIN_FLAG=$opt_l_flag
+  KEY_FLAG=$opt_K_flag
+  CMD_FLAG=$opt_c_flag
+  CMD_STR=${opt_c}
+  SCP_FLAG=$opt_s_flag
+  
+  HOSTS_NAME=`echo $HOSTS_ID | awk -F "[:]" '{print $1}'`
+  HOSTS_IP=`echo $HOSTS_ID | awk -F "[:]" '{print $2}'`
+  USER_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $3}'`
+  PASSWD_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $4}'`
+  
+  # login
+  if   [ 1 -eq $LOGIN_FLAG   ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_login :开始执行[$($g_FmtTimes)]"    ; ssh_login ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_login :结束[$($g_FmtTimes)]"    ; 
+  elif [ 1 -eq $KEY_FLAG	 ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_copy_id :开始执行[$($g_FmtTimes)]"	 ; ssh_copy_id   ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_copy_id   :结束[$($g_FmtTimes)]"	 ;  #| grep -vE "$destkey|.assword"
+  elif [ 1 -eq $CMD_FLAG	 ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_cmd   :开始执行[$($g_FmtTimes)]"	 ; ssh_cmd   ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_cmd   :结束[$($g_FmtTimes)]"	 ;  #| grep -vE "$destkey|.assword"
+  elif [ 1 -eq $SCP_FLAG 	 ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]scput     :开始执行[$($g_FmtTimes)]"    ; scp_put   ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]scput     :结束[$($g_FmtTimes)]"    ;  #| grep -vE "$destkey|.assword"
+  elif [ 2 -eq $SCP_FLAG	 ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]scpget    :开始执行[$($g_FmtTimes)]"    ; scp_get   ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]scpget    :结束[$($g_FmtTimes)]"    ;  #| grep -vE "$destkey|.assword"
+  else
+  showLog_warn "${LINENO}" " MAIN_CMD  FILED -[c|l|s] option !!!!"
+   showLog_warn "${g_dirBin}/sshpass -p ${PASSWD_STR} ssh -o 'stricthostkeychecking=no' -P ${PORT_STR}  ${USER_STR}@${HOSTS_IP} hostname"
+  exit
+  fi
+  
+  # showLog_debug "${LINENO}" "$USER_STR@$HOSTS_IP/$PASSWD_STR[$$]"
+  return 
+}
+
+
+
+#---------------------------
+#
+#  并发操作部分
+#
+#---------------------------
+proc_fifo()
+{
+  if [ -z $THEAD_NUM ];then THEAD_NUM=32;fi
+  #thead_num=500            #自定义并发数，数量越小越好
+  tmp_fifo_file="/tmp/$$.fifo" #以进程号ID命名管道文件
+  showLog_trace "${LINENO}" "$tmp_fifo_file|BEG:[$($g_FmtTimes)]"
+  mkfifo $tmp_fifo_file            #创建临时管道文件
+  exec 4<>$tmp_fifo_file           #以读写方式打开管道,文件描述符为4,也可区3~9任意描述符
+  rm -f $tmp_fifo_file             #删除临时管道文件,也可不删
+ 
+  if [ ${#IPUserPasslist[@]} -lt $THEAD_NUM ];then THEAD_NUM=${#IPUserPasslist[@]};fi
+  showLog_debug "${LINENO}" "并发数[$THEAD_NUM]" 
+  for((i=0;i<$THEAD_NUM;i++))  #利用for循环向管道中输入并发数量的空行
+  do
+      echo 
+  done >&4  #输出重定向到定义的文件描述上
+  
+  begintmie=`date +%G/%m/%d:%H:%M:%S`
+  #读配置文件并过滤掉注释行
+
+  for((i=0;i<${#IPUserPasslist[@]};i++))
+  do
+  read -u4
+  {
+          HOSTS_ID="${IPUserPasslist[$i]}";
+		  HostName=`echo $HOSTS_ID | awk -F "[:]" '{print $1}'`
+		  HOSTS_IP=`echo $HOSTS_ID | awk -F "[:]" '{print $2}'`
+		  USER_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $3}'`
+		
+  		  showLog_info "${LINENO}"  "IPUserPasslist[$i]=[$USER_STR@${HOSTS_IP}]"
+		  tmpLogFile="$g_dirSlog/$($g_FmtDates)-${g_FileName}-${HostName}-${USER_STR}@${HOSTS_IP}.log"
+		  test -f $tmpLogFile && rm -f ${tmpLogFile}
+  		  MAIN_CMD  2>&1 |tee -a ${tmpLogFile}
+          #MAIN_CMD 2>&1 |egrep -v "while executing|spawn|expect|assword|stty|logout" >> ${tmpLogFile}
+	      chmod 777 $g_dirSlog/*		  
+  		  usleep 0.001
+          echo >&4
+  }  2>&1 &  #>/dev/null
+  done
+    
+  showLog_info "${LINENO}"  "[等待所有后台执行完成]"
+  wait #等待所有后台执行完成
+  showLog_info "${LINENO}"  "[删除文件描述符]"
+  exec 4<&- #关闭输入
+  exec 4>&- #删除文件描述符
+  showLog_info "${LINENO}"  "$tmp_fifo_file|END:[$($g_FmtTimes)]"
+  
+}
+
+
+#---------------------------
+#
+#  遍历日志
+#
+#---------------------------
+
+log_end()
+{
+  echo -e "\n\t\t\e[31m-------------------<OUT>---------------------\e[0m\n"
+    for((i=0;i<${#IPUserPasslist[@]};i++))
+    do
+       HOSTS_ID="${IPUserPasslist[$i]}";
+       HostName=`echo $HOSTS_ID | awk -F "[:]" '{print $1}'`
+       HOSTS_IP=`echo $HOSTS_ID | awk -F "[:]" '{print $2}'`
+       USER_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $3}'`		
+       tmpLogFile="$g_dirSlog/$($g_FmtDates)-${g_FileName}-${HostName}-${USER_STR}@${HOSTS_IP}.log"
+	   WcNum="$(wc -l $tmpLogFile|awk '{printf $1}')"
+	   
+	   echo -e "\n\n\n--->日志:wc=[$WcNum]| cat   $tmpLogFile"
+	  # if [ 3 -ge $WcNum ];then  
+		cat  $tmpLogFile
+	  # fi
+       
+      
+    done
+	find $g_dirSlog -type f -size +10M -print0 | grep -v "bash" | xargs rm -f 2>&1 & 
+	
+	echo -e "\n\t\t\e[31m-------------------<END>----------------------\e[0m\n"
+	showLog_diss "${LINENO}" "i=[$i]|SUM:[${#IPUserPasslist[@]}]处理完成" 
+}
+
+psh_cmd()
+{
+  if [ 1 -eq ${opt_l_flag} ];then
+  {
+     for((i=0;i<${#IPUserPasslist[@]};i++))
+     do
+  
+          HOSTS_ID="${IPUserPasslist[$i]}";
+		  HOSTS_IP=`echo $HOSTS_ID | awk -F "[:]" '{print $1}'`
+		  USER_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $2}'`
+		
+  		  showLog_diss "${LINENO}"  "======Login[$i: ssh $USER_STR@${HOSTS_IP}]======="
+          MAIN_CMD		  
+  		  usleep 0.001
+          
+      done
+  }
+  else
+  {
+  	proc_fifo
+	log_end
+  }
+  fi
+
+}
+
+################################################
+# Function: main
+# Description: 主函数
+# Parameter:
+#     input:
+#     N/A
+#     output:
+#     N/A
+# Return: 0 -- success; not 0 -- failure
+# Others: N/A
+#################################################
+
+main()
+{
+	
+	echo "${LINENO}" "----------开始初始化--------"
+	init_all "$@"
+	#getHostNmaeIpUserPass
+    psh_cmd
+
+	return 0
+}
+
+main "$@"
+wait #等待所有后台执行完成
+ret=$?
+#在操作系统日志中记录审计日志
+#syslog "manager" "test.sh" "$ret" "User root do some test ${LINENO}"
+exit $ret
