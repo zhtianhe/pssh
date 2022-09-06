@@ -193,6 +193,96 @@ pssh -W -g User-app      -c 'startall'    #启动ncd组 USER1 用户下的 UserN
     |                                                         2018年 08月 21日 星期二 08:48:35 CST
     |______________________________________________________________________________________________
 ```
+###  使用例子
+
+- 批量执行 ssh 命令
+
+```sh
+pshg -wg 组名 -c "shellCmd"
+test -d  ./bin && pshg -wg 组名 -s put:bin:~/
+test -d  ./lib && pshg -wg 组名 -s put:lib:~/
+pshg  -wg xxx -c "kall;start.sh 2>/dev/null  ;   supervisord ctl status"| egrep "^[0-9]"
+
+pshg -wg xxx -c "stop.sh"
+
+```
+
+- 修改口令
+
+```bash
+pshg -h all -U root -W -c '
+passwd view --stdin <<EOF
+passwd123456
+EOF
+'
+
+#批量修改口令
+
+pshg -h all -U root -W -c '
+for users in $(cut -d: -f1  /etc/passwd |egrep "USERNAME01|USERNAME02")
+do
+
+passwd $users --stdin <<EOF
+passwd123456
+EOF
+
+done
+'
+
+
+```
+- 修改口令、添加 ssh 互信、vi 操作文件去重
+
+```bash
+#批量修改口令：添加互信
+pshg -g 组名 -W -U root -c '
+#===============
+for users in $(cut -d: -f1  /etc/passwd |egrep "USERNAME01|USERNAME02")
+do
+echo "update $users"
+passwd $users --stdin <<EOF
+passwd123456!@#
+EOF
+pam_tally2 -u $users -r  ;
+
+su - $users -c "
+mkdir -m 700 -p ~/.ssh
+cat>~/.ssh/authorized_keys<<EOF
+ssh-rsa xxxxxx USERNAME01-dev
+ssh-rsa xxxxxx USERNAME02-DEV
+EOF
+chmod 700 ~/.ssh/authorized_keys
+vi ~/.ssh/authorized_keys<<EOF
+:sort u
+:wq!
+EOF
+"
+
+done
+
+#======================
+'
+```
+
+- 添加文件
+
+```bash
+#添加sudo权限
+pshg -g 组名 -W -U root -c '
+egrep "USERNAME01" /etc/passwd && {
+cat >/etc/sudoers.d/USERNAME01 <<EOF
+#添加sudo
+USERNAME01        ALL=(ALL)     NOPASSWD:ALL ,!/*bin/su - root
+USERNAME02        ALL=(ALL)     PASSWD:/*bin/su - root  #生产去掉本行
+EOF
+chmod 755 /etc/sudoers.d/
+chmod 600 /etc/sudoers.d/USERNAME01
+} 
+'
+
+```
+
+---
 
 ## 3、网络验证工具-iport
 
