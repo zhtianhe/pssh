@@ -871,14 +871,14 @@ expect<<!
   ;;
   2 ) #showLog_debug "${LINENO}" " ${g_dirBin}/sshpass -p ${PASSWD_STR} scp  -o 'stricthostkeychecking=no' -p ${PORT_STR} -rp  ${USER_STR}@${HOSTS_IP}:${SCP_DES_STR}  ${SCP_LOC_STR}"
        case $OptRsyncFlag in
-	0)${g_dirBin}/sshpass -p ${PASSWD_STR} scp  -o 'stricthostkeychecking=no' -P ${PORT_STR} -rp ${USER_STR}@${HOSTS_IP}:${SCP_DES_STR}  ${SCP_LOC_STR} ;;
+        0)${g_dirBin}/sshpass -p ${PASSWD_STR} scp  -o 'stricthostkeychecking=no' -P ${PORT_STR} -rp ${USER_STR}@${HOSTS_IP}:${SCP_DES_STR}  ${SCP_LOC_STR} ;;
         1)${g_dirBin}/sshpass -p ${PASSWD_STR} rsync -av  $USER_STR@$HOSTS_IP:$SCP_DES_STR  $SCP_LOC_STR;;
         *)showLog_error "${LINENO}"  "OptRsyncFlag=[$OptRsyncFlag] 0-scp 1-rsync ";;
        esac
   ;;
   * )
        case $OptRsyncFlag in
-	0)scp  -o 'stricthostkeychecking=no' -P ${PORT_STR} -rp ${USER_STR}@${HOSTS_IP}:${SCP_DES_STR}  ${SCP_LOC_STR} ;;
+        0)scp  -o 'stricthostkeychecking=no' -P ${PORT_STR} -rp ${USER_STR}@${HOSTS_IP}:${SCP_DES_STR}  ${SCP_LOC_STR} ;;
         1)rsync -av  $USER_STR@$HOSTS_IP:$SCP_DES_STR  $SCP_LOC_STR;;
         *)showLog_error "${LINENO}"  "OptRsyncFlag=[$OptRsyncFlag] 0-scp 1-rsync ";;
        esac
@@ -915,7 +915,7 @@ expect<<!
   ;;
   2 )
        case $OptRsyncFlag in
-	0)${g_dirBin}/sshpass -p ${PASSWD_STR} scp  -o 'stricthostkeychecking=no' -P ${PORT_STR} -rp ${SCP_LOC_STR} ${USER_STR}@${HOSTS_IP}:${SCP_DES_STR} ;;
+        0)${g_dirBin}/sshpass -p ${PASSWD_STR} scp  -o 'stricthostkeychecking=no' -P ${PORT_STR} -rp ${SCP_LOC_STR} ${USER_STR}@${HOSTS_IP}:${SCP_DES_STR} ;;
         1)${g_dirBin}/sshpass -p ${PASSWD_STR} rsync -av $SCP_LOC_STR   $USER_STR@$HOSTS_IP:$SCP_DES_STR;;
         *)showLog_error "${LINENO}"  "OptRsyncFlag=[$OptRsyncFlag] 0-scp 1-rsync ";;
        esac
