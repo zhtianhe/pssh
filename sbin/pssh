@@ -2,7 +2,7 @@
 #*TMOUT=60
 #############################################################################
 ## Copyright:
-## Filename: psh
+## Filename: psh-YQ
 ## Description:  自动化运维工具-Psh
 ## Version: v1.1
 ## Created: 
@@ -25,10 +25,11 @@ declare g_BinPath="$g_RootPath/bin"                   #当前脚本bin目录
 declare g_SbinPath="$g_RootPath/sbin"                 #当前脚本bin目录
 export  PATH=${g_BinPath}:$g_SbinPath:$PATH           #声明环境变量
 declare g_ConfFile="${g_FileName%%.*}.conf"           #当前脚本配置文件
+
 declare g_logPath=""                                  #日志路径
 declare g_logFile=""                                  #日志文件名称
 declare g_logLevel=4                                  #当前脚本日志级别: debug:1; info:2; warn:3; error:4  ;#all:0 diss=8
-declare g_ScriptName='pssh'                           #脚本内部文件名
+declare g_ScriptName='pshg'                           #脚本内部文件名
 declare g_srciptVersion='1.0.0.1'                     #脚本版本号
 #数据格式
 g_FmtTimes="date -d today +%Y-%m-%d-%H:%M:%S"  #srcdir="`pwd`"
@@ -72,7 +73,7 @@ init_path()
 	
 	g_dir="${g_setup_tool_package_home}"
 	g_dirBin="${g_dir}/bin"
-	g_dirSlog="$HOME/log/slog"               ;[ -d "${g_dirSlog}" ] || mkdir -m 777 -p "${g_dirSlog}"      #slog   path
+	g_dirSlog="$HOME/slog"                  ;[ -d "${g_dirSlog}" ] || mkdir -m 777 -p "${g_dirSlog}"      #slog   path
 	g_logPath="${g_dirSlog}"                ;[ -d "${g_logPath}" ] || mkdir -m 777 -p "${g_logPath}"      #日志目录 
 	g_dirScfg="${g_dir}/scfg"               ;[ -d "${g_dirScfg}" ] || mkdir -m 500 -p "${g_dirScfg}"      #config path
 	g_dirSlib="${g_dir}/slib"               ;[ -d "${g_dirSlib}" ] || mkdir -m 555 -p "${g_dirSlib}"      #func   path
@@ -80,17 +81,17 @@ init_path()
 	#g_dirDat="${g_dir}/file/dat"            ;[ -d "${g_dirDat}"  ] || mkdir -m 755 -p "${g_dirDat}"       #data   path
 	#g_dirDatE="${g_dirDat}/$(${g_FmtDates})";[ -d "${g_dirDatE}" ] || mkdir -m 755 -p "${g_dirDatE}"      #data+date path
 
-    g_ScriptConf=                                               #脚本配置文件
-	g_ScriptHosts="${g_dirScfg}/.${g_ScriptName}-hosts.conf"                  #主机配置文件信息	
-	g_ScriptBase64="$g_dirScfg/${g_ScriptName}-Base64"
-	g_ScriptGroup="${g_dirScfg}/${g_ScriptName}-UserGroup"      #组配置文件
+        g_ScriptConf=                                               #脚本配置文件
+	g_ScriptHosts="${g_dirScfg}/pshg-hosts.conf"                  #主机配置文件信息	
+	g_ScriptBase64="$g_dirScfg/pshg-Base64"
+	g_ScriptGroup="${g_dirScfg}/pshg-UserGroup"      #组配置文件
 	#g_ScriptTables="${g_dirScfg}/${g_ScriptName}-tables.conf"  #迁移的表清单
 	g_logFile="$($g_FmtDates)-${g_scriptName}.log"                             #日志文件名
-    TimeOut=60;                                                 #超时时间默认60
+        TimeOut=60;                                                 #超时时间默认60
 	#s=' '
 	keys="$(sed -ne "/\<base64_key/{s#base64_key.*=##g;p}" $g_ScriptGroup)"          #获取key
 	#keys=$s
-    return 0;
+        return 0;
 	cd - >/dev/null
 }
 
@@ -211,14 +212,16 @@ cat << EOT
     |   名称    ：  $g_ScriptName
     |   类型    ：  Bash (主动推送)|zh_CN.UTF-8
     |   应用环境:   LINUX 
-    |   依赖命令：  ssh|scp|rsync|expect|openssl
+    |   依赖命令：  ssh|scp|expect|openssl
     |   功能描述：  集群批量管理操作工具;
-    |   三大功能:   1、ssh 单点/穿行登录 
+    |   三大功能:   1、ssh 登录 
     |               2、ssh 批量远程命令 
     |               3、scp 批量文件上传下载
-    |         优点:通过配置 初始秘钥文件,和组操作文件制作出加密文件,
-    |              #安装简单：vi $HOME/.bash_porfile
+    |         优点:通过配置 初始秘钥文件,和组操作文件制作出CA文件,
+    |              #安装简单：$__ScriptName --install
     |         缺点:配置初始秘钥文件,和组操作文件,脚本不能加密
+    |              若要用ssh互信不用加 -w 选项
+    |              不支持批量下载同名文件操作(后续开发)
     |              类似软件: pssh | clushtershell | Ansible  
     |-----------------------------------------------------------------------------------------------------
     | 
@@ -227,66 +230,56 @@ cat << EOT
     | Options:
     |     --help              帮助信息
     |    *-g, --group         组选项  | 组名称标签；组配置文件[]
-    |    *-g, --group         组清单  | 列举出组名清单
     |    *-h, --hosts         主机名称| all:所有主机|主机配置文件[]	
-    |    *-H, --hosts         主机清单| 列举出名称和IP	
+    |    *-H, --hosts         主机清单| 	
     |    *-U, --username      用户名称| 无该选项-`whoami` 或者组标签中用户| all:所有用户   	
     |    *-l, --login         登录标识| 无参数
     |    *-c, --cmdsh         执行命令| 命令有空格的加引号:(注意单双引号和转义)                    
     |    *-s, --scp           文件传输| 发送:put:srcdir,destdir 
     |                                 | 获取:get:srcdir,destdir
-	|    *-S, --rsync         文件传输|  S:使用rsync 命令 小s:使用scp命令 
-    |     -w, --passwd        密码选项| 使用 expect 工具自动填充口令 
-    |     -W, --passwd        密码选项| 使用 sshpss  工具自动填充口令
-    |     -v, --version       脚本版本|                 
+    |     -w, --passwd        密码选项| 无参数 脚本自动填充yes/no 及口令 （无 -w/W 默认互信） 
+    |     -W, --passwd        密码选项| 无参数 可执行程序实现  -o 'stricthostkeychecking=no'（无 -w/W 默认互信）
+    |     -v, --version       脚本版本                 
     |     -L, --logleve       日志级别| debug:1; info:2; warn:3; error:4  ;#all:0 diss=8"    
     |     -p, --port          主机端口| 默:22   
     |     -t,                 进程数量| 默:10 、1-用于调试 
     |     -T, --timeout       超时时间| 默:60 、   
-    |    #-a, --all           所有用户| 所有组(暂未实现)
-    |    #-x, --removel       排除主机| 组名| 多个用 逗号,分割(暂未实现)
+    |    #-a, --all          所有用户| 所有组(暂未实现)
+    |    #-x, --removel      排除主机| 组名| 多个用 逗号,分割(暂未实现)
     |     -k, --key           制作证书| 
-    |     -K, --key           制作互信|并传输互信文件 (执行该步骤时先执行 -c 'id')
+    |     -K, --key           制作互信|并传输互信文件 
     |     -E, --key           编辑本脚本|vi $g_PathFileName 
     |    #-i, --install       安装脚本| 默认安装目录:$HOME/Zssh/bin 
     |    #--clog              清除日志| 清除 $g_ScriptName 执行的日志
     | Exit status
-    |      0      OK
-    |      !=0    ERROR
+    |      0      if OK
+    |      !=0    if serious problems
     | 
     | Example:
-    |     1) 登录: ssh --port=22 UserName@IPADDR
+    |     1) login: ssh --port=22 cpns@cpns1
     | 
     |       A)使用秘钥文件自动登录
-    |         $g_ScriptName -lW -h hostname -U userName  
-    |         $g_ScriptName -lw -h hostname -U userName  #登录缓慢
-    |       B)串行登录 groupApp 组
-    |         $g_ScriptName -lW -g groupApp -U userName  
-    |      
-    |     2) 执行命令
+    |          $g_ScriptName -lwh cpns1 
+    |         $g_ScriptName -lwh cpns1 -p 22  -u cpns 
+    |         $g_ScriptName -lwh 20.200.33.135 -p 22 -U cpns
     | 
-    |       A) 执行 id 命令
-    |         $g_ScriptName -W -h hostname -U userName  -c 'id'
-    |       B)并行 执行 id 命令
-    |        $g_ScriptName -W -g groupApp  -U userName  -c 'id'
-	|        $g_ScriptName -W -h all  -U all  -c 'id'  #已知所有IP 及所有用户执行
+    |       B)使用 ssh 互信免密码登录
+    |           ssh cpns1
     |      
+    |     2) cmdsh: ssh --port=22 cpns@cpns1:cmdsh
     | 
-    |     3)get file：下载文件(注意多节点下覆盖)
-    |       SCP  ：   $g_ScriptName -W -h hostname -s get:/destdir/file:/srcdir/ 
-    |       RSYNC：   $g_ScriptName -W -h hostname -S get:/destdir/file:/srcdir/ 
-    |        - 组
-    |        SCP  : $g_ScriptName -W -g groupApp   -s get:/destdir/file:/srcdir/ 
-	|        RSYNC: $g_ScriptName -W -g groupApp   -S get:/destdir/file:/srcdir/ 
-	|
-    |     4)put file： 将本地文件上传至目标机
-    |        SCP  : $g_ScriptName -W -h hostname -s put:~/srcdir/file:~/destdir/ 
-	|        RSYNC: $g_ScriptName -W -h hostname -S put:~/srcdir/file:~/destdir/ 
-    |        - 组
-    |        SCP  : $g_ScriptName -W -g groupApp -s put:~/srcdir/file:~/destdir/ 
-	|        RSYNC: $g_ScriptName -W -g groupApp -S put:~/srcdir/file:~/destdir/ 
-	|
-    |     5)key file:制作密钥
+    |         $g_ScriptName -wh cpns1,cpns2,cpns3 -c "date;hostname" 
+    | 
+    |         $g_ScriptName -wg group1 -c "date;hostname"
+    | 
+    |     3)get file
+    |         $g_ScriptName -wh cpns1,cpns2,cpns3 -s get:~/destdir/file:~/srcdir/ 
+    | 
+    |     
+    |     4)put file
+    |         $g_ScriptName -wh cpns1,cpns2,cpns3 -s put:~/srcdir/file:~/destdir/ 
+    |         
+    |     5)key file
     |          $__ScriptName  -k
     |         配置文件[]不存在请在60s内输入:Zssh/bin/.hosts.cfg 
     |         输入信息为:[Zssh/bin/.hosts.cfg]
@@ -294,16 +287,8 @@ cat << EOT
     |     
     |          根据提示输入：文件名称 内容格式如下：
     |          cat  $__ScripHosts.Example    
-    |
-    |     6)制作互信
-    |       A) 执行 id 命令
-    |         $g_ScriptName -W -h all  -U all  -c 'id'
-    |       B) 开始互信 所有 IP 及 所有用户
-    |         $g_ScriptName -W -h all  -U all  -K
-    |       c) 开始互信 app 组 及 所有用户
-    |         $g_ScriptName -W -g app  -U all  -K
-	|
-    |     7)User_Group file：组文件
+    |         
+    |         6)User_Group file
     |             cat  $__ScriptConf.Example 
     |         注意:base64_key为初始秘钥口令串仅在制作证书时有效。
     |              该口令并不能解密证书。     
@@ -653,7 +638,7 @@ init_hosts_argv(){
 				        	
 				        	case  $OptUser in
 				        	  "${UserName}" | "all" )showLog_debug "${LINENO}" "$HostName $IpStr  $UserName OK"
-							     IPUserPasslist=("$(echo "$IPUserPasslist,$IpStr:$UserName:$UserKey "|sed -e 's/^,//g' -e 's/,$//g' )")
+							     IPUserPasslist=("$(echo "$IPUserPasslist,$HostName:$IpStr:$UserName:$UserKey "|sed -e 's/^,//g' -e 's/,$//g' )")
 							    ;;
                               *                     )  continue;;					  
 				        	esac
@@ -960,9 +945,10 @@ MAIN_CMD(){
   CMD_STR=${opt_c}
   SCP_FLAG=$opt_s_flag
   
-  HOSTS_IP=`echo $HOSTS_ID | awk -F "[:]" '{print $1}'`
-  USER_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $2}'`
-  PASSWD_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $3}'`
+  HOSTS_NAME=`echo $HOSTS_ID | awk -F "[:]" '{print $1}'`
+  HOSTS_IP=`echo $HOSTS_ID | awk -F "[:]" '{print $2}'`
+  USER_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $3}'`
+  PASSWD_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $4}'`
   
   # login
   if   [ 1 -eq $LOGIN_FLAG   ]; then  showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_login :开始执行[$($g_FmtTimes)]"    ; ssh_login ;showLog_info "${LINENO}" "[$USER_STR@$HOSTS_IP]ssh_login :结束[$($g_FmtTimes)]"    ; 
@@ -989,7 +975,7 @@ MAIN_CMD(){
 #---------------------------
 proc_fifo()
 {
-  if [ -z $THEAD_NUM ];then THEAD_NUM=10;fi
+  if [ -z $THEAD_NUM ];then THEAD_NUM=32;fi
   #thead_num=500            #自定义并发数，数量越小越好
   tmp_fifo_file="/tmp/$$.fifo" #以进程号ID命名管道文件
   showLog_trace "${LINENO}" "$tmp_fifo_file|BEG:[$($g_FmtTimes)]"
@@ -1012,11 +998,12 @@ proc_fifo()
   read -u4
   {
           HOSTS_ID="${IPUserPasslist[$i]}";
-		  HOSTS_IP=`echo $HOSTS_ID | awk -F "[:]" '{print $1}'`
-		  USER_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $2}'`
+		  HostName=`echo $HOSTS_ID | awk -F "[:]" '{print $1}'`
+		  HOSTS_IP=`echo $HOSTS_ID | awk -F "[:]" '{print $2}'`
+		  USER_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $3}'`
 		
   		  showLog_info "${LINENO}"  "IPUserPasslist[$i]=[$USER_STR@${HOSTS_IP}]"
-		  tmpLogFile="$g_dirSlog/$($g_FmtDates)-${g_FileName}-${USER_STR}@${HOSTS_IP}.log"
+		  tmpLogFile="$g_dirSlog/$($g_FmtDates)-${g_FileName}-${HostName}-${USER_STR}@${HOSTS_IP}.log"
 		  test -f $tmpLogFile && rm -f ${tmpLogFile}
   		  MAIN_CMD  2>&1 |tee -a ${tmpLogFile}
           #MAIN_CMD 2>&1 |egrep -v "while executing|spawn|expect|assword|stty|logout" >> ${tmpLogFile}
@@ -1048,9 +1035,10 @@ log_end()
     for((i=0;i<${#IPUserPasslist[@]};i++))
     do
        HOSTS_ID="${IPUserPasslist[$i]}";
-       HOSTS_IP=`echo $HOSTS_ID | awk -F "[:]" '{print $1}'`
-	   USER_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $2}'`		
-       tmpLogFile="$g_dirSlog/$($g_FmtDates)-${g_FileName}-${USER_STR}@${HOSTS_IP}.log"
+       HostName=`echo $HOSTS_ID | awk -F "[:]" '{print $1}'`
+       HOSTS_IP=`echo $HOSTS_ID | awk -F "[:]" '{print $2}'`
+       USER_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $3}'`		
+       tmpLogFile="$g_dirSlog/$($g_FmtDates)-${g_FileName}-${HostName}-${USER_STR}@${HOSTS_IP}.log"
 	   WcNum="$(wc -l $tmpLogFile|awk '{printf $1}')"
 	   
 	   echo -e "\n\n\n--->日志:wc=[$WcNum]| cat   $tmpLogFile"
@@ -1073,13 +1061,14 @@ psh_cmd()
      for((i=0;i<${#IPUserPasslist[@]};i++))
      do
   
-          HOSTS_ID="${IPUserPasslist[$i]}";
-		  HOSTS_IP=`echo $HOSTS_ID | awk -F "[:]" '{print $1}'`
-		  USER_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $2}'`
-		
-  		  showLog_diss "${LINENO}"  "======Login[$i: ssh $USER_STR@${HOSTS_IP}]======="
-          MAIN_CMD		  
-  		  usleep 0.001
+		HOSTS_ID="${IPUserPasslist[$i]}";
+		HostName=`echo $HOSTS_ID | awk -F "[:]" '{print $1}'`
+		HOSTS_IP=`echo $HOSTS_ID | awk -F "[:]" '{print $2}'`
+		USER_STR=`echo $HOSTS_ID | awk -F "[:]" '{print $3}'`		
+
+		showLog_diss "${LINENO}"  "======Login[$i: ssh $USER_STR@${HOSTS_IP}]======="
+		MAIN_CMD		  
+		usleep 0.001
           
       done
   }
