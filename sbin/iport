@@ -1,10 +1,11 @@
 #!/bin/bash
-#ÍøÂçÑéÖ¤¹¤¾ß
-#1¡¢telnet
-#2¡¢nc
-#3¡¢nmap 
-declare g_OIFS="$IFS"                                 #·Ö¸ô·û                                                                                                
-declare g_SrcDir="$(pwd)"                             #µ±Ç°Ö´ĞĞÄ¿Â¼
+#ç½‘ç»œéªŒè¯å·¥å…·
+#1ã€telnet
+#2ã€nc
+#3ã€nmap 
+#4ã€ping
+declare g_OIFS="$IFS"                                 #åˆ†éš”ç¬¦                                                                                                
+declare g_SrcDir="$(pwd)"                             #å½“å‰æ‰§è¡Œç›®å½•
 g_PathFile=$(readlink -f $0)
 g_DriSrc=$(dirname $(dirname $g_PathFile))
 g_DirScfg=$g_DriSrc/scfg
@@ -14,7 +15,7 @@ iportFile=$DirScfg/iport.list
 IP=$1
 PORT=$2
 
-#1¡¢³õÊ¼»¯Êı¾İ:
+#1ã€åˆå§‹åŒ–æ•°æ®:
 init(){
     IPA=$(ip addr show 2>/dev/null|sed -n '/\<inet.*eth/{s#inet\(.*\)/.*#\1#g;s#[ \t]##g;p}')
     if [ -z "${IPA}" ];then
@@ -30,19 +31,20 @@ init(){
 
 iports(){
     #ncStr=$(echo '\n'|nc -w2 -nvz $IP $PORT 2>&1 |tr -s '\n' ':')
+    pinStr=$(ping -w2  -c1 $IP >/dev/null 2>&1 && echo "ping:Y" || echo "ping:N")
     ncStr=$(echo '\n'|nc -w2 -nv $IP $PORT 2>&1 |tr -s '\n' ':')
     case   $ncStr in
-        *[Tt][Ii][Mm][Ee]*|*[Oo][Uu][Tt]*)printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ 2 | N ] timeOut\n" $IPS $IP $PORT ;;
+        *[Tt][Ii][Mm][Ee]*|*[Oo][Uu][Tt]*)printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ $pinStr | 2 |     nc:N ] timeOut\n" $IPS $IP $PORT ;;
         *succeeded*|*[Cc]onnection*[Tt][Oo]*$IP*)
-            printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ 1 | Y ] succeeded\n" $IPS $IP $PORT;;
+            printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ $pinStr | 1 |     nc:Y ] succeeded\n" $IPS $IP $PORT;;
         *failed*|*[Cc]onnection*refused*   )
-            printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ 0 | N ] failed\n" $IPS $IP $PORT;;
+            printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ $pinStr | 0 |     nc:N ] failed\n" $IPS $IP $PORT;;
         *found* | * )
-           
+
             if [ 1 -eq $(echo '\n'|telnet $IP $PORT 2>/dev/null|egrep '\^\]'|wc -l) ];then
-                printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ 1 | Y ] succeeded\n" $IPS $IP $PORT 
+                printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ $pinStr | 1 | telnet:Y ] succeeded\n" $IPS $IP $PORT
             else
-                printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ 0 | N ] failed\n" $IPS $IP $PORT 
+                printf "[$(date +%F\ %T)] \t %-16s -> \t %-16s %-4d [ $pinStr | 0 | telnet:N ] failed\n" $IPS $IP $PORT
             fi
             ;;
     esac
@@ -52,14 +54,14 @@ iports(){
 cmds(){
 
     if [ ! -f $iportFile ];then
-        echo "line[$LINENO] iportFile=[$iportFile] ²»´æÔÚÍË³ö »òÕß [$g_PathFile ip port]"
-        echo  "ÅäÖÃÎÄ¼ş¸ñÊ½Îª£º
+        echo "line[$LINENO] iportFile=[$iportFile] ä¸å­˜åœ¨é€€å‡º æˆ–è€… [$g_PathFile ip port]"
+        echo  "é…ç½®æ–‡ä»¶æ ¼å¼ä¸ºï¼š
            #xxxxx
            IP|port0,p1,p2,p3 #xxxx
         "
         exit -1
     else
-        echo "line[$LINENO]  ¶ÁÈ¡ÅäÖÃÎÄ¼şÁĞ±í iportFile=[$iportFile]"
+        echo "line[$LINENO]  è¯»å–é…ç½®æ–‡ä»¶åˆ—è¡¨ iportFile=[$iportFile]"
     fi
 
     while read line;do
@@ -78,11 +80,10 @@ cmds(){
 }
 
 
-#»ñÈ¡Ö´ĞĞ½á¹û
+#è·å–æ‰§è¡Œç»“æœ
 main(){
 init "$@"
 cmds
 }
-
 
 main
